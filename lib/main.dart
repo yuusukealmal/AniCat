@@ -10,12 +10,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'AniCat Downloader',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 183, 58, 156)),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'AniCat'),
     );
   }
 }
@@ -30,12 +31,38 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  void _onAddButtonPressed() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final TextEditingController textController = TextEditingController();
+        return AlertDialog(
+          title: const Text('Enter Anime1 URL'),
+          content: TextField(
+            controller: textController,
+            decoration: const InputDecoration(
+              hintText: 'Enter URL here',
+            ),
+            maxLines: 1,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final inputUrl = textController.text;
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -43,25 +70,13 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        leading: IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
+      body: const Center(),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        onPressed: _onAddButtonPressed,
+        tooltip: 'Add Anime1 URL',
         child: const Icon(Icons.add),
       ),
     );
