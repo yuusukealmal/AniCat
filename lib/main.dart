@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:anicat/parser.dart';
 
 void main() {
   runApp(const MyApp());
@@ -56,6 +57,8 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 final inputUrl = textController.text;
                 Navigator.of(context).pop();
+                Future<List<String>> list = parse(inputUrl);
+                debugPrint(list.toString());
               },
               child: const Text('OK'),
             ),
