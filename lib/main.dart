@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:anicat/parser.dart';
+import 'package:anicat/parse.dart';
+import 'package:anicat/handle.dart';
 
 void main() {
   runApp(const MyApp());
