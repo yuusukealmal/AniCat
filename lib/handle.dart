@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:anicat/routes.dart';
 import 'package:http/http.dart' as http;
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Anime {
   String folder;
@@ -11,7 +13,7 @@ class Anime {
   String? title;
   String? data;
   String xsend = "d=";
-  String? cookies;
+  Map<String, String> headers = getHeaderCookies();
 
   Anime({required this.folder, required this.url});
 
@@ -36,7 +38,7 @@ class Anime {
     var p = RegExp(r"p=(.*?);").firstMatch(set)!.group(1);
     var h = RegExp(r"HttpOnly,h=(.*?);").firstMatch(set)!.group(1);
 
-    cookies = "e=$e;p=$p;h=$h;";
+    headers["cookie"] = "e=$e;p=$p;h=$h;";
   }
 
   Future<void> init() async {
@@ -47,8 +49,54 @@ class Anime {
 class MP4 extends Anime {
   MP4({required super.folder, required super.url});
 
-  int chunk = 1024;
+  int chunk = 10240;
+  int retry = 3;
+
+  Future<Directory> getPath() async {
+    final root = await getExternalStorageDirectory();
+    var f = Directory('${root!.path}/$folder');
+    if (!await f.exists()) {
+      await f.create(recursive: true);
+    }
+    return f;
+  }
 
   void download() async {
+    try {
+      var url = Uri.parse(realUrl);
+      var request = http.Request('GET', url);
+      request.headers.addAll(headers);
+
+      var root = await getPath();
+      final file = File('${root.path}/$title.mp4');
+      final sink = file.openWrite();
+      debugPrint("Downloading ${file.toString()}");
+      http.StreamedResponse response = await request.send();
+      debugPrint(response.contentLength.toString());
+      await response.stream.listen(
+        (chunk) {
+          debugPrint("adding chunk");
+          sink.add(chunk);
+        },
+        onDone: () async {
+          debugPrint("Download Finished for $title");
+          await sink.close();
+        },
+        onError: (error) {
+          debugPrint("Download Failed for $title, Cause by $error");
+          sink.close();
+          throw error;
+        },
+        cancelOnError: true,
+      ).asFuture();
+    } catch (e) {
+      debugPrint("Fail to Downlaod $title, Cause by $e");
+      if (retry > 0) {
+        retry--;
+        download();
+      } else {
+        debugPrint("Download Failed for $title");
+      }
+    }
   }
 }
