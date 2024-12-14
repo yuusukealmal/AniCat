@@ -38,9 +38,9 @@ Future<List<String>> getEpisode(String url) async {
     var eleDiv = soup.find('div', class_: 'nav-previous');
     var nextUrl = eleDiv!.find('a')!.getAttrValue('href')!;
     urls.addAll(await getEpisode(nextUrl));
+  } else {
+    var title = soup.find('h1', class_: 'page-title')!.text;
+    urls.add(title);
   }
-
-  var title = soup.find('h1', class_: 'page-title')!.text;
-  urls.add(title);
   return urls;
 }
