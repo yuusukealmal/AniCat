@@ -58,8 +58,16 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 final inputUrl = textController.text;
                 Navigator.of(context).pop();
-                Future<List<String>> list = parse(inputUrl);
-                debugPrint(list.toString());
+                parse(inputUrl).then((urls) {
+                  urls = urls.reversed.toList();
+                  var folder = urls.removeAt(0);
+                  for (var url in urls) {
+                    var anime = MP4(folder: folder, url: url);
+                    anime.init().then((_) => {anime.download()});
+                  }
+                }).catchError((error) {
+                  debugPrint(error.toString());
+                });
               },
               child: const Text('OK'),
             ),
