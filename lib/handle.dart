@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:anicat/routes.dart';
 import 'package:http/http.dart' as http;
@@ -14,6 +16,7 @@ class Anime {
   String? data;
   String xsend = "d=";
   Map<String, String> headers = getHeaderCookies();
+  int length = 0;
 
   Anime({required this.folder, required this.url});
 
@@ -51,6 +54,9 @@ class MP4 extends Anime {
 
   int chunk = 10240;
   int retry = 3;
+  int _downloaded = 0;
+  final StreamController<double> progressController =
+      StreamController<double>();
 
   Future<Directory> getPath() async {
     final root = await getExternalStorageDirectory();
@@ -61,7 +67,7 @@ class MP4 extends Anime {
     return f;
   }
 
-  void download() async {
+  Future<void> download() async {
     try {
       var url = Uri.parse(realUrl);
       var request = http.Request('GET', url);
@@ -70,33 +76,44 @@ class MP4 extends Anime {
       var root = await getPath();
       final file = File('${root.path}/$title.mp4');
       final sink = file.openWrite();
-      debugPrint("Downloading ${file.toString()}");
       http.StreamedResponse response = await request.send();
-      debugPrint(response.contentLength.toString());
+
+      length = response.contentLength!;
+      _downloaded = 0;
+
       await response.stream.listen(
         (chunk) {
-          debugPrint("adding chunk");
+          _downloaded += chunk.length;
           sink.add(chunk);
+          double progress = _downloaded / length;
+          progressController.add(progress);
         },
         onDone: () async {
           debugPrint("Download Finished for $title");
           await sink.close();
+          progressController.close();
         },
         onError: (error) {
           debugPrint("Download Failed for $title, Cause by $error");
+          progressController.close();
           sink.close();
           throw error;
         },
-        cancelOnError: true,
+        cancelOnError: false, //TODO
       ).asFuture();
     } catch (e) {
-      debugPrint("Fail to Downlaod $title, Cause by $e");
+      debugPrint("Fail to Download $title, Cause by $e");
       if (retry > 0) {
         retry--;
-        download();
+        download(); // Retry download
       } else {
         debugPrint("Download Failed for $title");
+        progressController.close();
       }
     }
   }
+
+  int get current => _downloaded;
+  int get size => length;
+  Stream<double> get progressStream => progressController.stream;
 }
