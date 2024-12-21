@@ -230,6 +230,14 @@ class FileListScreenState extends State<FileListScreen> with _Load {
   List<FileSystemEntity> _files = [];
 
   @override
+  void initState() {
+    super.initState();
+    _loadFiles(widget.folderPath).then((value) => setState(() {
+          _files = value;
+        }));
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
