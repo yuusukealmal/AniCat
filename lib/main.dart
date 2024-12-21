@@ -35,7 +35,28 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+mixin LoadFile {
+  Future<List<FileSystemEntity>> _loadFiles(String folderPath) async {
+    debugPrint(folderPath);
+    final directory = Directory(folderPath);
+    var folders =
+        await directory.list().where((entity) => entity is File).toList();
+    return folders;
+  }
+
+  Future<void> _openFolder(BuildContext context, String folderPath) async {
+    final files = await _loadFiles(folderPath);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            FileListScreen(folderPath: folderPath, files: files),
+      ),
+    );
+  }
+}
+
+class _MyHomePageState extends State<MyHomePage> with LoadFile {
   List<String> folders = [];
 
   @override
@@ -158,24 +179,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Future<List<FileSystemEntity>> _loadFiles(String folderPath) async {
-    final directory = Directory(folderPath);
-    var folders =
-        await directory.list().where((entity) => entity is File).toList();
-    return folders;
-  }
-
-  void _openFolder(String folderPath) async {
-    final files = await _loadFiles(folderPath);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            FileListScreen(folderPath: folderPath, files: files),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -194,7 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
             return ListTile(
               title: Text(folderName),
               leading: const Icon(Icons.folder),
-              onTap: () => _openFolder(folderPath),
+              onTap: () => _openFolder(context, folderPath),
             );
           },
         ),
@@ -210,7 +213,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class FileListScreen extends StatelessWidget {
+class FileListScreen extends StatelessWidget with LoadFile {
   final String folderPath;
   final List<FileSystemEntity> files;
 
@@ -229,19 +232,41 @@ class FileListScreen extends StatelessWidget {
             onPressed: () {}, icon: const Icon(Icons.keyboard_backspace_sharp)),
         title: Text(folderPath.split('/').last),
       ),
-      body: ListView.builder(
-        itemCount: files.length,
-        itemBuilder: (context, index) {
-          final file = files[index] as File;
-          final fileName = file.path.split('/').last;
-          return ListTile(
-            title: Text(fileName),
-            leading: const Icon(Icons.insert_drive_file),
-            onTap: () {
-              debugPrint('Tapped file: $fileName');
-            },
-          );
-        },
+      body: RefreshIndicator(
+        onRefresh: () => _openFolder(context, folderPath),
+        child: ListView.builder(
+          itemCount: files.length,
+          itemBuilder: (context, index) {
+            final file = files[index] as File;
+            final fileName = file.path.split('/').last;
+            return ListTile(
+              title: Text(fileName),
+              leading: {
+                    'mp4': const Icon(Icons.video_file),
+                    'mkv': const Icon(Icons.video_file),
+                    'webm': const Icon(Icons.video_file),
+                    'jpg': const Icon(Icons.image),
+                    'png': const Icon(Icons.image),
+                    'jpeg': const Icon(Icons.image),
+                    'gif': const Icon(Icons.gif),
+                    'mp3': const Icon(Icons.music_note),
+                    'wav': const Icon(Icons.music_note),
+                    'aac': const Icon(Icons.music_note),
+                    'ogg': const Icon(Icons.music_note),
+                    'm4a': const Icon(Icons.music_note),
+                    'flac': const Icon(Icons.music_note),
+                    'mp4v': const Icon(Icons.video_file),
+                    'mov': const Icon(Icons.video_file),
+                    'wmv': const Icon(Icons.video_file),
+                    'avi': const Icon(Icons.video_file),
+                  }[fileName.split('.').last] ??
+                  const Icon(Icons.insert_drive_file),
+              onTap: () {
+                debugPrint('Tapped file: $fileName');
+              },
+            );
+          },
+        ),
       ),
     );
   }
