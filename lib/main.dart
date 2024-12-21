@@ -55,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final folderList = await directory
         .list()
         .where((entity) => entity is Directory)
-        .map((entity) => entity.path.split('/').last)
+        .map((entity) => entity.path)
         .toList();
     setState(() {
       folders = folderList;
@@ -158,6 +158,24 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Future<List<FileSystemEntity>> _loadFiles(String folderPath) async {
+    final directory = Directory(folderPath);
+    var folders =
+        await directory.list().where((entity) => entity is File).toList();
+    return folders;
+  }
+
+  void _openFolder(String folderPath) async {
+    final files = await _loadFiles(folderPath);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            FileListScreen(folderPath: folderPath, files: files),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -171,20 +189,59 @@ class _MyHomePageState extends State<MyHomePage> {
         child: ListView.builder(
           itemCount: folders.length,
           itemBuilder: (context, index) {
+            final folderPath = folders[index];
+            final folderName = folderPath.split('/').last;
             return ListTile(
-              title: Text(folders[index]),
+              title: Text(folderName),
               leading: const Icon(Icons.folder),
-              onTap: () {
-                debugPrint('Tapped folder: ${folders[index]}');
-              },
+              onTap: () => _openFolder(folderPath),
             );
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _onAddButtonPressed,
+        onPressed: () {
+          _onAddButtonPressed;
+        },
         tooltip: 'Add Anime1 URL',
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class FileListScreen extends StatelessWidget {
+  final String folderPath;
+  final List<FileSystemEntity> files;
+
+  const FileListScreen({
+    super.key,
+    required this.folderPath,
+    required this.files,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        leading: IconButton(
+            onPressed: () {}, icon: const Icon(Icons.keyboard_backspace_sharp)),
+        title: Text(folderPath.split('/').last),
+      ),
+      body: ListView.builder(
+        itemCount: files.length,
+        itemBuilder: (context, index) {
+          final file = files[index] as File;
+          final fileName = file.path.split('/').last;
+          return ListTile(
+            title: Text(fileName),
+            leading: const Icon(Icons.insert_drive_file),
+            onTap: () {
+              debugPrint('Tapped file: $fileName');
+            },
+          );
+        },
       ),
     );
   }
