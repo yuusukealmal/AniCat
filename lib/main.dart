@@ -35,9 +35,8 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-mixin _LoadFile {
+mixin _Load {
   Future<List<FileSystemEntity>> _loadFiles(String folderPath) async {
-    debugPrint(folderPath);
     final directory = Directory(folderPath);
     var folders =
         await directory.list().where((entity) => entity is File).toList();
@@ -56,7 +55,7 @@ mixin _LoadFile {
   }
 }
 
-class _MyHomePageState extends State<MyHomePage> with _LoadFile {
+class _MyHomePageState extends State<MyHomePage> with _Load {
   List<String> folders = [];
 
   @override
@@ -213,7 +212,7 @@ class _MyHomePageState extends State<MyHomePage> with _LoadFile {
   }
 }
 
-class FileListScreen extends StatelessWidget with _LoadFile {
+class FileListScreen extends StatefulWidget {
   final String folderPath;
   final List<FileSystemEntity> files;
 
@@ -224,20 +223,30 @@ class FileListScreen extends StatelessWidget with _LoadFile {
   });
 
   @override
+  FileListScreenState createState() => FileListScreenState();
+}
+
+class FileListScreenState extends State<FileListScreen> with _Load {
+  List<FileSystemEntity> _files = [];
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         leading: IconButton(
             onPressed: () {}, icon: const Icon(Icons.keyboard_backspace_sharp)),
-        title: Text(folderPath.split('/').last),
+        title: Text(widget.folderPath.split('/').last),
       ),
       body: RefreshIndicator(
-        onRefresh: () => _openFolder(context, folderPath),
+        onRefresh: () =>
+            _loadFiles(widget.folderPath).then((value) => setState(() {
+                  _files = value;
+                })),
         child: ListView.builder(
-          itemCount: files.length,
+          itemCount: _files.length,
           itemBuilder: (context, index) {
-            final file = files[index] as File;
+            final file = _files[index] as File;
             final fileName = file.path.split('/').last;
             return ListTile(
               title: Text(fileName),
