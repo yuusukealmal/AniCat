@@ -83,14 +83,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       '${convertMB(anime.current)}/${convertMB(anime.size)}  ${(progress * 100).toStringAsFixed(2)}% Completed'),
                 ],
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Dismiss the dialog
-                  },
-                  child: const Text('Close'),
-                ),
-              ],
             );
           },
         );
