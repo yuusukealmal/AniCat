@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:anicat/parse.dart';
 import 'package:anicat/handle.dart';
 import 'package:anicat/calc.dart';
@@ -34,6 +36,32 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  List<String> folders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFolders();
+  }
+
+  Future<void> _loadFolders() async {
+    final root = await getExternalStorageDirectory();
+    if (root == null) {
+      debugPrint('No external storage found.');
+      return;
+    }
+
+    final directory = Directory(root.path);
+    final folderList = await directory
+        .list()
+        .where((entity) => entity is Directory)
+        .map((entity) => entity.path.split('/').last)
+        .toList();
+    setState(() {
+      folders = folderList;
+    });
+  }
+
   void _showProgress(BuildContext context, MP4 anime) {
     showDialog(
       context: context,
@@ -146,7 +174,20 @@ class _MyHomePageState extends State<MyHomePage> {
         leading: IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
         title: Text(widget.title),
       ),
-      body: const Center(),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: folders.isNotEmpty
+            ? folders.map((folder) {
+                return ListTile(
+                  title: Text(folder),
+                  leading: const Icon(Icons.folder),
+                  onTap: () {
+                    debugPrint('Folder tapped: $folder');
+                  },
+                );
+              }).toList()
+            : const [Text('No folders found.')],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _onAddButtonPressed,
         tooltip: 'Add Anime1 URL',
