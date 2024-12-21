@@ -35,7 +35,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-mixin LoadFile {
+mixin _LoadFile {
   Future<List<FileSystemEntity>> _loadFiles(String folderPath) async {
     debugPrint(folderPath);
     final directory = Directory(folderPath);
@@ -56,7 +56,7 @@ mixin LoadFile {
   }
 }
 
-class _MyHomePageState extends State<MyHomePage> with LoadFile {
+class _MyHomePageState extends State<MyHomePage> with _LoadFile {
   List<String> folders = [];
 
   @override
@@ -213,7 +213,7 @@ class _MyHomePageState extends State<MyHomePage> with LoadFile {
   }
 }
 
-class FileListScreen extends StatelessWidget with LoadFile {
+class FileListScreen extends StatelessWidget with _LoadFile {
   final String folderPath;
   final List<FileSystemEntity> files;
 
