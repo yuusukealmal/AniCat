@@ -166,19 +166,20 @@ class _MyHomePageState extends State<MyHomePage> {
         leading: IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
         title: Text(widget.title),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: folders.isNotEmpty
-            ? folders.map((folder) {
-                return ListTile(
-                  title: Text(folder),
-                  leading: const Icon(Icons.folder),
-                  onTap: () {
-                    debugPrint('Folder tapped: $folder');
-                  },
-                );
-              }).toList()
-            : const [Text('No folders found.')],
+      body: RefreshIndicator(
+        onRefresh: _loadFolders,
+        child: ListView.builder(
+          itemCount: folders.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(folders[index]),
+              leading: const Icon(Icons.folder),
+              onTap: () {
+                debugPrint('Tapped folder: ${folders[index]}');
+              },
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _onAddButtonPressed,
