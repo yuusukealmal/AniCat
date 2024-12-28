@@ -81,26 +81,25 @@ class MP4 extends Anime {
       length = response.contentLength!;
       _downloaded = 0;
 
-      await response.stream.listen(
-        (chunk) {
-          _downloaded += chunk.length;
-          sink.add(chunk);
-          double progress = _downloaded / length;
-          progressController.add(progress);
-        },
-        onDone: () async {
-          debugPrint("Download Finished for $title");
-          await sink.close();
+      await response.stream.listen((chunk) {
+        _downloaded += chunk.length;
+        sink.add(chunk);
+        double progress = _downloaded / length;
+        progressController.add(progress);
+        if (_downloaded == length) {
+          debugPrint("Download Finished for $title with force");
           progressController.close();
-        },
-        onError: (error) {
-          debugPrint("Download Failed for $title, Cause by $error");
-          progressController.close();
-          sink.close();
-          throw error;
-        },
-        cancelOnError: false, //TODO
-      ).asFuture();
+        }
+      }, onDone: () async {
+        debugPrint("Download Finished for $title with onDone");
+        await sink.close();
+        progressController.close();
+      }, onError: (error) {
+        debugPrint("Download Failed for $title, Cause by $error");
+        progressController.close();
+        sink.close();
+        throw error;
+      }, cancelOnError: true).asFuture();
     } catch (e) {
       debugPrint("Fail to Download $title, Cause by $e");
       if (retry > 0) {

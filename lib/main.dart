@@ -82,34 +82,6 @@ class _MyHomePageState extends State<MyHomePage> with _Load {
     });
   }
 
-  void _showProgress(BuildContext context, MP4 anime) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return StreamBuilder<double>(
-          stream: anime.progressStream,
-          initialData: 0.0,
-          builder: (context, snapshot) {
-            final progress = snapshot.data ?? 0.0;
-            return AlertDialog(
-              title: Text('Downloading ${anime.title}'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  LinearProgressIndicator(value: progress),
-                  const SizedBox(height: 10),
-                  Text(
-                      '${convertMB(anime.current)}/${convertMB(anime.size)}  ${(progress * 100).toStringAsFixed(2)}% Completed'),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   void _onAddButtonPressed() {
     showDialog(
       context: context,
@@ -159,12 +131,45 @@ class _MyHomePageState extends State<MyHomePage> with _Load {
                   urls = urls.reversed.toList();
                   var folder = urls.removeAt(0);
                   for (var url in urls) {
-                    var anime = MP4(folder: folder, url: url);
-                    await anime.init();
-                    if (mounted) {
-                      _showProgress(super.context, anime);
-                    }
-                    await anime.download();
+                  var anime = MP4(folder: folder, url: url);
+                  await anime.init();
+                  debugPrint("Get Started for ${anime.title}");
+                  Future.delayed(const Duration(seconds: 3), () {});
+                  if (mounted) {
+                    showDialog(
+                      context: super.context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return StreamBuilder<double>(
+                          stream: anime.progressStream,
+                          initialData: 0.0,
+                          builder: (context, snapshot) {
+                            final progress = snapshot.data ?? 0.0;
+                            if (progress >= 1.0) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (Navigator.canPop(context)) {
+                                  Navigator.of(context).pop();
+                                }
+                              });
+                            }
+                            return AlertDialog(
+                              title: Text('Downloading ${anime.title}'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  LinearProgressIndicator(value: progress),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                      '${convertMB(anime.current)}/${convertMB(anime.size)}  ${(progress * 100).toStringAsFixed(2)}% Completed'),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  }
+                  await anime.download();
                   }
                 }).catchError((error) {
                   debugPrint(error.toString());
@@ -203,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> with _Load {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _onAddButtonPressed;
+          _onAddButtonPressed();
         },
         tooltip: 'Add Anime1 URL',
         child: const Icon(Icons.add),
