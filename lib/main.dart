@@ -131,45 +131,46 @@ class _MyHomePageState extends State<MyHomePage> with _Load {
                   urls = urls.reversed.toList();
                   var folder = urls.removeAt(0);
                   for (var url in urls) {
-                  var anime = MP4(folder: folder, url: url);
-                  await anime.init();
-                  debugPrint("Get Started for ${anime.title}");
-                  Future.delayed(const Duration(seconds: 3), () {});
-                  if (mounted) {
-                    showDialog(
-                      context: super.context,
-                      barrierDismissible: false,
-                      builder: (BuildContext context) {
-                        return StreamBuilder<double>(
-                          stream: anime.progressStream,
-                          initialData: 0.0,
-                          builder: (context, snapshot) {
-                            final progress = snapshot.data ?? 0.0;
-                            if (progress >= 1.0) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (Navigator.canPop(context)) {
-                                  Navigator.of(context).pop();
-                                }
-                              });
-                            }
-                            return AlertDialog(
-                              title: Text('Downloading ${anime.title}'),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  LinearProgressIndicator(value: progress),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                      '${convertMB(anime.current)}/${convertMB(anime.size)}  ${(progress * 100).toStringAsFixed(2)}% Completed'),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    );
-                  }
-                  await anime.download();
+                    var anime = MP4(folder: folder, url: url);
+                    await anime.init();
+                    debugPrint("Get Started for ${anime.title}");
+                    Future.delayed(const Duration(seconds: 3), () {});
+                    if (mounted) {
+                      showDialog(
+                        context: super.context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return StreamBuilder<double>(
+                            stream: anime.progressStream,
+                            initialData: 0.0,
+                            builder: (context, snapshot) {
+                              final progress = snapshot.data ?? 0.0;
+                              if (progress >= 1.0) {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  if (Navigator.canPop(context)) {
+                                    Navigator.of(context).pop();
+                                  }
+                                });
+                              }
+                              return AlertDialog(
+                                title: Text('Downloading ${anime.title}'),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    LinearProgressIndicator(value: progress),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                        '${convertMB(anime.current)}/${convertMB(anime.size)}  ${(progress * 100).toStringAsFixed(2)}% Completed'),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }
+                    await anime.download();
                   }
                 }).catchError((error) {
                   debugPrint(error.toString());
@@ -200,6 +201,10 @@ class _MyHomePageState extends State<MyHomePage> with _Load {
             final folderName = folderPath.split('/').last;
             return ListTile(
               title: Text(folderName),
+              subtitle: FutureBuilder(
+                  future: _loadFiles(folderPath),
+                  builder: (context, snapshot) =>
+                      Text("${snapshot.data!.length.toString()} Files")),
               leading: const Icon(Icons.folder),
               onTap: () => _openFolder(context, folderPath),
             );
@@ -266,6 +271,8 @@ class FileListScreenState extends State<FileListScreen> with _Load {
             final fileName = file.path.split('/').last;
             return ListTile(
               title: Text(fileName),
+              subtitle: Text(getFileSize(file.lengthSync())),
+              // trailing: const Icon(Icons.open_in_new_rounded),
               leading: {
                     'mp4': const Icon(Icons.video_file),
                     'mkv': const Icon(Icons.video_file),
@@ -288,6 +295,8 @@ class FileListScreenState extends State<FileListScreen> with _Load {
                   const Icon(Icons.insert_drive_file),
               onTap: () {
                 debugPrint('Tapped file: $fileName');
+                // final currentOrientation = MediaQuery.of(super.context).orientation;
+                // debugPrint(currentOrientation.toString());
               },
             );
           },
