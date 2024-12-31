@@ -75,12 +75,21 @@ class MP4 extends Anime {
 
       var root = await getPath();
       final file = File('${root.path}/$title.mp4');
-      final sink = file.openWrite();
       http.StreamedResponse response = await request.send();
 
       length = response.contentLength!;
       _downloaded = 0;
+      if (file.existsSync()) {
+        if (file.lengthSync() == length) {
+          debugPrint("File Exists $title, Size $length");
+          progressController.close();
+          return;
+        }
+      } else {
+        await file.delete();
+      }
 
+      final sink = file.openWrite();
       await response.stream.listen((chunk) {
         _downloaded += chunk.length;
         sink.add(chunk);
