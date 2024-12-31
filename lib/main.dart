@@ -204,7 +204,7 @@ class _MyHomePageState extends State<MyHomePage> with _Load {
               subtitle: FutureBuilder(
                   future: _loadFiles(folderPath),
                   builder: (context, snapshot) =>
-                      Text("${snapshot.data!.length.toString()} Files")),
+                      Text("${snapshot.data?.length.toString()} Files")),
               leading: const Icon(Icons.folder),
               onTap: () => _openFolder(context, folderPath),
             );
