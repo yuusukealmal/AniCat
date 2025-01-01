@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:anicat/parse.dart';
 import 'package:anicat/handle.dart';
 import 'package:anicat/calc.dart';
+import 'package:flutter_video_view/flutter_video_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -295,13 +296,40 @@ class FileListScreenState extends State<FileListScreen> with _Load {
                   const Icon(Icons.insert_drive_file),
               onTap: () {
                 debugPrint('Tapped file: $fileName');
-                // final currentOrientation = MediaQuery.of(super.context).orientation;
-                // debugPrint(currentOrientation.toString());
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          VideoPlayerScreen(filePath: file.path)),
+                );
               },
             );
           },
         ),
       ),
     );
+  }
+}
+
+class VideoPlayerScreen extends StatefulWidget {
+  final String filePath;
+  const VideoPlayerScreen({super.key, required this.filePath});
+
+  @override
+  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
+}
+
+class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final VideoPlayerController videoPlayerController =
+        VideoPlayerController.file(File(widget.filePath));
+
+    final view = VideoView(
+      controller: VideoController(
+          videoPlayerController: videoPlayerController,
+          videoConfig: VideoConfig()),
+    );
+    return view;
   }
 }
