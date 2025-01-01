@@ -27,15 +27,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
 mixin _Load {
   Future<List<FileSystemEntity>> _loadFiles(String folderPath) async {
     final directory = Directory(folderPath);
@@ -54,6 +45,15 @@ mixin _Load {
       ),
     );
   }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> with _Load {
