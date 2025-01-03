@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_video_view/flutter_video_view.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:anicat/parse.dart';
 import 'package:anicat/handle.dart';
 import 'package:anicat/calc.dart';
-import 'package:flutter_video_view/flutter_video_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -248,6 +250,15 @@ class FileListScreenState extends State<FileListScreen> with _Load {
         }));
   }
 
+  Future<Uint8List?> _getThumbnail(File file) async {
+    return await VideoThumbnail.thumbnailData(
+      video: file.path,
+      imageFormat: ImageFormat.PNG,
+      timeMs: 720000,
+      quality: 100,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -270,37 +281,60 @@ class FileListScreenState extends State<FileListScreen> with _Load {
           itemBuilder: (context, index) {
             final file = _files[index] as File;
             final fileName = file.path.split('/').last;
-            return ListTile(
-              title: Text(fileName),
-              subtitle: Text(getFileSize(file.lengthSync())),
-              // trailing: const Icon(Icons.open_in_new_rounded),
-              leading: {
-                    'mp4': const Icon(Icons.video_file),
-                    'mkv': const Icon(Icons.video_file),
-                    'webm': const Icon(Icons.video_file),
-                    'jpg': const Icon(Icons.image),
-                    'png': const Icon(Icons.image),
-                    'jpeg': const Icon(Icons.image),
-                    'gif': const Icon(Icons.gif),
-                    'mp3': const Icon(Icons.music_note),
-                    'wav': const Icon(Icons.music_note),
-                    'aac': const Icon(Icons.music_note),
-                    'ogg': const Icon(Icons.music_note),
-                    'm4a': const Icon(Icons.music_note),
-                    'flac': const Icon(Icons.music_note),
-                    'mp4v': const Icon(Icons.video_file),
-                    'mov': const Icon(Icons.video_file),
-                    'wmv': const Icon(Icons.video_file),
-                    'avi': const Icon(Icons.video_file),
-                  }[fileName.split('.').last] ??
-                  const Icon(Icons.insert_drive_file),
-              onTap: () {
-                debugPrint('Tapped file: $fileName');
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          VideoPlayerScreen(filePath: file.path)),
+
+            return FutureBuilder<Uint8List?>(
+              future: _getThumbnail(file),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const ListTile(
+                    leading: CircularProgressIndicator(),
+                    title: Text("Loading..."),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return ListTile(
+                    leading: const Icon(Icons.error),
+                    title: const Text("Error loading thumbnail"),
+                    subtitle: Text(snapshot.error.toString()),
+                  );
+                }
+
+                final thumbnail = snapshot.data;
+                return ListTile(
+                  title: Text(fileName),
+                  subtitle: Text(getFileSize(file.lengthSync())),
+                  leading: {
+                        'mp4': thumbnail != null
+                            ? Image.memory(thumbnail)
+                            : const Icon(Icons.video_file),
+                        'mkv': const Icon(Icons.video_file),
+                        'webm': const Icon(Icons.video_file),
+                        'jpg': const Icon(Icons.image),
+                        'png': const Icon(Icons.image),
+                        'jpeg': const Icon(Icons.image),
+                        'gif': const Icon(Icons.gif),
+                        'mp3': const Icon(Icons.music_note),
+                        'wav': const Icon(Icons.music_note),
+                        'aac': const Icon(Icons.music_note),
+                        'ogg': const Icon(Icons.music_note),
+                        'm4a': const Icon(Icons.music_note),
+                        'flac': const Icon(Icons.music_note),
+                        'mp4v': const Icon(Icons.video_file),
+                        'mov': const Icon(Icons.video_file),
+                        'wmv': const Icon(Icons.video_file),
+                        'avi': const Icon(Icons.video_file),
+                      }[fileName.split('.').last] ??
+                      const Icon(Icons.insert_drive_file),
+                  onTap: () {
+                    debugPrint('Tapped file: $fileName');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              VideoPlayerScreen(filePath: file.path)),
+                    );
+                  },
                 );
               },
             );
