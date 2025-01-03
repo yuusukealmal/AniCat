@@ -84,9 +84,9 @@ class MP4 extends Anime {
           debugPrint("File Exists $title, Size $length");
           progressController.close();
           return;
+        } else{
+          await file.delete();
         }
-      } else {
-        await file.delete();
       }
 
       final sink = file.openWrite();

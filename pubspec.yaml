@@ -15,11 +15,16 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   path_provider: ^2.1.5
+  flutter_video_view: ^2.1.1
+  video_thumbnail:
+    git:
+      url: https://github.com/Shahidbangash/video_thumbnail.git
+      ref: master
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 
 flutter:
