@@ -202,14 +202,20 @@ class _MyHomePageState extends State<MyHomePage> with _Load {
           itemBuilder: (context, index) {
             final folderPath = folders[index];
             final folderName = folderPath.split('/').last;
-            return ListTile(
-              title: Text(folderName),
-              subtitle: FutureBuilder(
-                  future: _loadFiles(folderPath),
-                  builder: (context, snapshot) =>
-                      Text("${snapshot.data?.length.toString()} Files")),
-              leading: const Icon(Icons.folder),
-              onTap: () => _openFolder(context, folderPath),
+            return FutureBuilder(
+              future: _loadFiles(folderPath),
+              builder: (context, snapshot) {
+                final files = snapshot.data;
+                if (files == null || files.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return ListTile(
+                  title: Text(folderName),
+                  subtitle: Text("${files.length} Files"),
+                  leading: const Icon(Icons.folder),
+                  onTap: () => _openFolder(context, folderPath),
+                );
+              },
             );
           },
         ),
