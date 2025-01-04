@@ -82,6 +82,8 @@ class MP4 extends Anime {
       if (file.existsSync()) {
         if (file.lengthSync() == length) {
           debugPrint("File Exists $title, Size $length");
+          progressController.add(1.0);
+          await Future.delayed(const Duration(milliseconds: 100));
           progressController.close();
           return;
         } else{
@@ -113,7 +115,7 @@ class MP4 extends Anime {
       debugPrint("Fail to Download $title, Cause by $e");
       if (retry > 0) {
         retry--;
-        download(); // Retry download
+        download();
       } else {
         debugPrint("Download Failed for $title");
         progressController.close();
