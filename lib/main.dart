@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_video_view/flutter_video_view.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -49,6 +49,31 @@ mixin _Load {
   }
 }
 
+mixin _Rotate {
+  void setPortraitMode() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  void setLandscapeMode() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
+  void enableRotation() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+}
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -58,7 +83,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with _Load {
+class _MyHomePageState extends State<MyHomePage> with _Load, _Rotate {
   List<String> folders = [];
 
   @override
@@ -245,7 +270,7 @@ class FileListScreen extends StatefulWidget {
   FileListScreenState createState() => FileListScreenState();
 }
 
-class FileListScreenState extends State<FileListScreen> with _Load {
+class FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
   List<FileSystemEntity> _files = [];
 
   @override
@@ -254,6 +279,12 @@ class FileListScreenState extends State<FileListScreen> with _Load {
     _loadFiles(widget.folderPath).then((value) => setState(() {
           _files = value;
         }));
+  }
+
+  @override
+  void dispose() {
+    setPortraitMode();
+    super.dispose();
   }
 
   Future<Uint8List?> _getThumbnail(File file) async {
@@ -359,17 +390,28 @@ class VideoPlayerScreen extends StatefulWidget {
   State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
 }
 
-class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+class _VideoPlayerScreenState extends State<VideoPlayerScreen> with _Rotate {
+  @override
+  void initState() {
+    setLandscapeMode();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    setPortraitMode();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final VideoPlayerController videoPlayerController =
         VideoPlayerController.file(File(widget.filePath));
 
-    final view = VideoView(
+    return VideoView(
       controller: VideoController(
           videoPlayerController: videoPlayerController,
           videoConfig: VideoConfig()),
     );
-    return view;
   }
 }
