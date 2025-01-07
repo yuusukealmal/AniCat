@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:anicat/routes.dart';
@@ -86,7 +87,7 @@ class MP4 extends Anime {
           await Future.delayed(const Duration(milliseconds: 100));
           progressController.close();
           return;
-        } else{
+        } else {
           await file.delete();
         }
       }
