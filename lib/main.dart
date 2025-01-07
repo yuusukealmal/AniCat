@@ -1,7 +1,10 @@
 import 'dart:io';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:image/image.dart' as img;
 import 'package:flutter_video_view/flutter_video_view.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:anicat/parse.dart';
@@ -46,6 +49,53 @@ mixin _Load {
             FileListScreen(folderPath: folderPath, files: files),
       ),
     );
+  }
+
+  Future<String> _getThumbnail(File file) async {
+    try {
+      Uint8List? thumbnail = await VideoThumbnail.thumbnailData(
+        video: file.path,
+        imageFormat: ImageFormat.PNG,
+        timeMs: 720000,
+        quality: 100,
+      );
+      img.Image image = img.decodeImage(thumbnail!)!;
+      final cache = await getApplicationCacheDirectory();
+      String hash = sha256
+          .convert(
+              utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
+          .toString()
+          .substring(0, 16);
+      var path = "${cache.path}/$hash.png";
+      debugPrint("Saving $path");
+      File(path).writeAsBytesSync(img.encodePng(image));
+      return path;
+    } catch (e) {
+      debugPrint("Error ${e.toString()}");
+      return "";
+    }
+  }
+
+  Future<List<String>> _cacheImage(List<FileSystemEntity> files) async {
+    List<String> hashMap = [];
+    final cache = await getApplicationCacheDirectory();
+    for (var file in files) {
+      String hash = sha256
+          .convert(
+              utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
+          .toString()
+          .substring(0, 16);
+      var path = "${cache.path}/$hash.png";
+      if (!await File(path).exists()) {
+        debugPrint("Downloading ${file.path}");
+        await _getThumbnail(file as File).then((value) => hashMap.add(value));
+      } else {
+        debugPrint("Cached ${file.path}");
+        hashMap.add(path);
+      }
+    }
+    debugPrint("Map ${hashMap.toString()}");
+    return hashMap;
   }
 }
 
@@ -272,6 +322,7 @@ class FileListScreen extends StatefulWidget {
 
 class FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
   List<FileSystemEntity> _files = [];
+  List<String> _fileCacheMap = [];
 
   @override
   void initState() {
@@ -287,15 +338,6 @@ class FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
     super.dispose();
   }
 
-  Future<Uint8List?> _getThumbnail(File file) async {
-    return await VideoThumbnail.thumbnailData(
-      video: file.path,
-      imageFormat: ImageFormat.PNG,
-      timeMs: 720000,
-      quality: 100,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -309,75 +351,61 @@ class FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
         title: Text(widget.folderPath.split('/').last),
       ),
       body: RefreshIndicator(
-        onRefresh: () =>
-            _loadFiles(widget.folderPath).then((value) => setState(() {
-                  _files = value;
-                })),
-        child: ListView.builder(
-          itemCount: _files.length,
-          itemBuilder: (context, index) {
-            final file = _files[index] as File;
-            final fileName = file.path.split('/').last;
-
-            return FutureBuilder<Uint8List?>(
-              future: _getThumbnail(file),
+          onRefresh: () =>
+              _loadFiles(widget.folderPath).then((value) => setState(() {
+                    _files = value;
+                  })),
+          child: FutureBuilder(
+              future: _cacheImage(widget.files),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const ListTile(
-                    leading: CircularProgressIndicator(),
-                    title: Text("Loading..."),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return ListTile(
-                    leading: const Icon(Icons.error),
-                    title: const Text("Error loading thumbnail"),
-                    subtitle: Text(snapshot.error.toString()),
-                  );
-                }
-
-                final thumbnail = snapshot.data;
-                return ListTile(
-                  title: Text(fileName),
-                  subtitle: Text(getFileSize(file.lengthSync())),
-                  leading: {
-                        'mp4': thumbnail != null
-                            ? Image.memory(thumbnail)
-                            : const Icon(Icons.video_file),
-                        'mkv': const Icon(Icons.video_file),
-                        'webm': const Icon(Icons.video_file),
-                        'jpg': const Icon(Icons.image),
-                        'png': const Icon(Icons.image),
-                        'jpeg': const Icon(Icons.image),
-                        'gif': const Icon(Icons.gif),
-                        'mp3': const Icon(Icons.music_note),
-                        'wav': const Icon(Icons.music_note),
-                        'aac': const Icon(Icons.music_note),
-                        'ogg': const Icon(Icons.music_note),
-                        'm4a': const Icon(Icons.music_note),
-                        'flac': const Icon(Icons.music_note),
-                        'mp4v': const Icon(Icons.video_file),
-                        'mov': const Icon(Icons.video_file),
-                        'wmv': const Icon(Icons.video_file),
-                        'avi': const Icon(Icons.video_file),
-                      }[fileName.split('.').last] ??
-                      const Icon(Icons.insert_drive_file),
-                  onTap: () {
-                    debugPrint('Tapped file: $fileName');
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              VideoPlayerScreen(filePath: file.path)),
+                return ListView.builder(
+                  itemCount: _files.length,
+                  itemBuilder: (context, index) {
+                    final file = _files[index] as File;
+                    final fileName = file.path.split('/').last;
+                    _fileCacheMap = snapshot.data as List<String>;
+                    return ListTile(
+                      title: Text(fileName),
+                      subtitle: Text(getFileSize(file.lengthSync())),
+                      leading: {
+                            'mp4': _fileCacheMap[index] != ""
+                                ? Image(
+                                    image:
+                                        FileImage(File(_fileCacheMap[index])))
+                                : const Icon(Icons.video_file),
+                            'mkv': const Icon(Icons.video_file),
+                            'webm': const Icon(Icons.video_file),
+                            'jpg': const Icon(Icons.image),
+                            'png': const Icon(Icons.image),
+                            'jpeg': const Icon(Icons.image),
+                            'gif': const Icon(Icons.gif),
+                            'mp3': const Icon(Icons.music_note),
+                            'wav': const Icon(Icons.music_note),
+                            'aac': const Icon(Icons.music_note),
+                            'ogg': const Icon(Icons.music_note),
+                            'm4a': const Icon(Icons.music_note),
+                            'flac': const Icon(Icons.music_note),
+                            'mp4v': const Icon(Icons.video_file),
+                            'mov': const Icon(Icons.video_file),
+                            'wmv': const Icon(Icons.video_file),
+                            'avi': const Icon(Icons.video_file),
+                          }[fileName.split('.').last] ??
+                          const Icon(Icons.insert_drive_file),
+                      onTap: () {
+                        debugPrint('Tapped file: $fileName');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  VideoPlayerScreen(filePath: file.path)),
+                        );
+                      },
                     );
                   },
+                  //);
+                  //},
                 );
-              },
-            );
-          },
-        ),
-      ),
+              })),
     );
   }
 }
