@@ -7,9 +7,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter_video_view/flutter_video_view.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:anicat/parse.dart';
-import 'package:anicat/handle.dart';
-import 'package:anicat/calc.dart';
+import 'package:anicat/UrlParse.dart';
+import 'package:anicat/AnimeDownloader.dart';
+import 'package:anicat/Calc.dart';
 
 void main() {
   runApp(const MyApp());
