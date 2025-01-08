@@ -75,28 +75,6 @@ mixin _Load {
       return "";
     }
   }
-
-  Future<List<String>> _cacheImage(List<FileSystemEntity> files) async {
-    List<String> hashMap = [];
-    final cache = await getApplicationCacheDirectory();
-    for (var file in files) {
-      String hash = sha256
-          .convert(
-              utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
-          .toString()
-          .substring(0, 16);
-      var path = "${cache.path}/$hash.png";
-      if (!await File(path).exists()) {
-        debugPrint("Downloading ${file.path}");
-        await _getThumbnail(file as File).then((value) => hashMap.add(value));
-      } else {
-        debugPrint("Cached ${file.path}");
-        hashMap.add(path);
-      }
-    }
-    debugPrint("Map ${hashMap.toString()}");
-    return hashMap;
-  }
 }
 
 mixin _Rotate {
@@ -322,13 +300,15 @@ class FileListScreen extends StatefulWidget {
 
 class FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
   List<FileSystemEntity> _files = [];
-  List<String> _fileCacheMap = [];
+  Future<List<String>>? _fileCacheMap;
+  int _progress = 0;
 
   @override
   void initState() {
     super.initState();
     _loadFiles(widget.folderPath).then((value) => setState(() {
           _files = value;
+          _fileCacheMap = _cacheImage(value);
         }));
   }
 
@@ -336,6 +316,36 @@ class FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
   void dispose() {
     setPortraitMode();
     super.dispose();
+  }
+
+  Future<List<String>> _cacheImage(List<FileSystemEntity> files) async {
+    List<String> hashMap = [];
+    final cache = await getApplicationCacheDirectory();
+    for (var file in files) {
+      String hash = sha256
+          .convert(
+              utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
+          .toString()
+          .substring(0, 16);
+      var path = "${cache.path}/$hash.png";
+      if (!await File(path).exists()) {
+        debugPrint("Downloading ${file.path}");
+        await _getThumbnail(file as File).then((value) => {
+              hashMap.add(value),
+              setState(() {
+                _progress++;
+              })
+            });
+      } else {
+        debugPrint("Cached ${file.path}");
+        hashMap.add(path);
+        setState(() {
+          _progress++;
+        });
+      }
+    }
+    debugPrint("Map ${hashMap.toString()}");
+    return hashMap;
   }
 
   @override
@@ -356,55 +366,73 @@ class FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
                     _files = value;
                   })),
           child: FutureBuilder(
-              future: _cacheImage(widget.files),
+              future: _fileCacheMap,
               builder: (context, snapshot) {
-                return ListView.builder(
-                  itemCount: _files.length,
-                  itemBuilder: (context, index) {
-                    final file = _files[index] as File;
-                    final fileName = file.path.split('/').last;
-                    _fileCacheMap = snapshot.data as List<String>;
-                    return ListTile(
-                      title: Text(fileName),
-                      subtitle: Text(getFileSize(file.lengthSync())),
-                      leading: {
-                            'mp4': _fileCacheMap[index] != ""
-                                ? Image(
-                                    image:
-                                        FileImage(File(_fileCacheMap[index])))
-                                : const Icon(Icons.video_file),
-                            'mkv': const Icon(Icons.video_file),
-                            'webm': const Icon(Icons.video_file),
-                            'jpg': const Icon(Icons.image),
-                            'png': const Icon(Icons.image),
-                            'jpeg': const Icon(Icons.image),
-                            'gif': const Icon(Icons.gif),
-                            'mp3': const Icon(Icons.music_note),
-                            'wav': const Icon(Icons.music_note),
-                            'aac': const Icon(Icons.music_note),
-                            'ogg': const Icon(Icons.music_note),
-                            'm4a': const Icon(Icons.music_note),
-                            'flac': const Icon(Icons.music_note),
-                            'mp4v': const Icon(Icons.video_file),
-                            'mov': const Icon(Icons.video_file),
-                            'wmv': const Icon(Icons.video_file),
-                            'avi': const Icon(Icons.video_file),
-                          }[fileName.split('.').last] ??
-                          const Icon(Icons.insert_drive_file),
-                      onTap: () {
-                        debugPrint('Tapped file: $fileName');
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  VideoPlayerScreen(filePath: file.path)),
-                        );
-                      },
-                    );
-                  },
-                  //);
-                  //},
-                );
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                      child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(),
+                      Text(
+                          "Progress Thumbnail Cache $_progress/${_files.length}")
+                    ],
+                  ));
+                }
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return ListView.builder(
+                    itemCount: _files.length,
+                    itemBuilder: (context, index) {
+                      final file = _files[index] as File;
+                      final fileName = file.path.split('/').last;
+                      return ListTile(
+                        title: Text(fileName),
+                        subtitle: Text(getFileSize(file.lengthSync())),
+                        leading: {
+                              'mp4': snapshot.data![index] != ""
+                                  ? Image(
+                                      image: FileImage(
+                                          File(snapshot.data![index])))
+                                  : const Icon(Icons.video_file),
+                              'mkv': const Icon(Icons.video_file),
+                              'webm': const Icon(Icons.video_file),
+                              'jpg': const Icon(Icons.image),
+                              'png': const Icon(Icons.image),
+                              'jpeg': const Icon(Icons.image),
+                              'gif': const Icon(Icons.gif),
+                              'mp3': const Icon(Icons.music_note),
+                              'wav': const Icon(Icons.music_note),
+                              'aac': const Icon(Icons.music_note),
+                              'ogg': const Icon(Icons.music_note),
+                              'm4a': const Icon(Icons.music_note),
+                              'flac': const Icon(Icons.music_note),
+                              'mp4v': const Icon(Icons.video_file),
+                              'mov': const Icon(Icons.video_file),
+                              'wmv': const Icon(Icons.video_file),
+                              'avi': const Icon(Icons.video_file),
+                            }[fileName.split('.').last] ??
+                            const Icon(Icons.insert_drive_file),
+                        onTap: () {
+                          debugPrint('Tapped file: $fileName');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    VideoPlayerScreen(filePath: file.path)),
+                          );
+                        },
+                      );
+                    },
+                  );
+                }
+                return Center(
+                    child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline_rounded),
+                    Text("Progress Thumbnail Cache Failed")
+                  ],
+                ));
               })),
     );
   }
