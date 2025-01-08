@@ -186,6 +186,18 @@ class _MyHomePageState extends State<MyHomePage> with _Load, _Rotate {
                   }
                   urls = urls.reversed.toList();
                   var folder = urls.removeAt(0);
+                  if (mounted) {
+                    showDialog(
+                      context: super.context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Downloading Anime: $folder'),
+                          content: const LinearProgressIndicator(),
+                        );
+                      },
+                    );
+                  }
                   for (var url in urls) {
                     var anime = MP4(folder: folder, url: url);
                     await anime.init();
@@ -227,6 +239,9 @@ class _MyHomePageState extends State<MyHomePage> with _Load, _Rotate {
                       );
                     }
                     await anime.download();
+                  }
+                  if (Navigator.canPop(super.context)) {
+                    Navigator.of(super.context).pop();
                   }
                 }).catchError((error) {
                   debugPrint(error.toString());
