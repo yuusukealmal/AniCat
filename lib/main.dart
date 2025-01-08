@@ -208,12 +208,14 @@ class _MyHomePageState extends State<MyHomePage> with _Load, _Rotate {
                         context: super.context,
                         barrierDismissible: false,
                         builder: (BuildContext context) {
+                          bool dialogClosed = false;
                           return StreamBuilder<double>(
                             stream: anime.progressStream,
                             initialData: 0.0,
                             builder: (context, snapshot) {
                               final progress = snapshot.data ?? 0.0;
-                              if (progress >= 1.0) {
+                              if (progress >= 1.0 && !dialogClosed) {
+                                dialogClosed = true;
                                 WidgetsBinding.instance
                                     .addPostFrameCallback((_) {
                                   if (Navigator.canPop(context)) {
@@ -240,7 +242,8 @@ class _MyHomePageState extends State<MyHomePage> with _Load, _Rotate {
                     }
                     await anime.download();
                   }
-                  if (Navigator.canPop(super.context)) {
+                  if (mounted && Navigator.canPop(super.context)) {
+                    debugPrint("Download Completed");
                     Navigator.of(super.context).pop();
                   }
                 }).catchError((error) {
