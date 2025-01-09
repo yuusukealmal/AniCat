@@ -20,6 +20,8 @@ dependencies:
     git:
       url: https://github.com/Shahidbangash/video_thumbnail.git
       ref: master
+  crypto: ^3.0.6
+  image: ^4.5.2
 
 dev_dependencies:
   flutter_test:

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:anicat/routes.dart';
+import 'package:anicat/CookieHandle.dart';
 import 'package:http/http.dart' as http;
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:path_provider/path_provider.dart';
@@ -82,9 +82,11 @@ class MP4 extends Anime {
       if (file.existsSync()) {
         if (file.lengthSync() == length) {
           debugPrint("File Exists $title, Size $length");
+          progressController.add(1.0);
+          await Future.delayed(const Duration(milliseconds: 100));
           progressController.close();
           return;
-        } else{
+        } else {
           await file.delete();
         }
       }
@@ -113,7 +115,7 @@ class MP4 extends Anime {
       debugPrint("Fail to Download $title, Cause by $e");
       if (retry > 0) {
         retry--;
-        download(); // Retry download
+        download();
       } else {
         debugPrint("Download Failed for $title");
         progressController.close();
