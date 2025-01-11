@@ -7,9 +7,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter_video_view/flutter_video_view.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:anicat/UrlParse.dart';
-import 'package:anicat/AnimeDownloader.dart';
-import 'package:anicat/Calc.dart';
+import 'package:anicat/downloader/UrlParse.dart';
+import 'package:anicat/downloader/AnimeDownloader.dart';
+import 'package:anicat/functions/Calc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 
