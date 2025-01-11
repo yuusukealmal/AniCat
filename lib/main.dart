@@ -10,6 +10,8 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:anicat/UrlParse.dart';
 import 'package:anicat/AnimeDownloader.dart';
 import 'package:anicat/Calc.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
 
 void main() {
   runApp(const MyApp());
@@ -258,12 +260,69 @@ class _MyHomePageState extends State<MyHomePage> with _Load, _Rotate {
     );
   }
 
+  Future<String> _checkManageStoragePermission() async {
+    var status = await Permission.manageExternalStorage.status;
+    if (status.isRestricted) {
+      return "isRestricted";
+    }
+
+    if (status.isDenied) {
+      return "isDenied";
+    }
+    if (status.isPermanentlyDenied) {
+      return "isPermanentlyDenied";
+    }
+    return "Granted";
+  }
+
+  Future<void> _askManageStoragePermission() async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text("Access Denied"),
+        content: const Text("Please enable storage access in settings."),
+        actions: [
+          TextButton(
+              child: const Text("Open Settings"),
+              onPressed: () async {
+                await Permission.manageExternalStorage.request();
+              }),
+          TextButton(
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(),
+          )
+        ],
+      ),
+    );
+  }
+
+  Future<String?> _chooseSavingFolder() async {
+    return await FilesystemPicker.open(
+      title: 'Save to folder',
+      context: context,
+      rootDirectory: Directory('/storage/emulated/0/'),
+      fsType: FilesystemType.folder,
+      pickText: 'Save file to this folder',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        leading: IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
+        leading: IconButton(
+            onPressed: () async {
+              String access = await _checkManageStoragePermission();
+              if (access == "isRestricted" || access == "isDenied") {
+                await _askManageStoragePermission();
+              } else if (access == "isPermanentlyDenied") {
+                await openAppSettings();
+              } else if (access == "Granted") {
+                await _chooseSavingFolder();
+              }
+            },
+            icon: const Icon(Icons.menu)),
         title: Text(widget.title),
       ),
       body: RefreshIndicator(
