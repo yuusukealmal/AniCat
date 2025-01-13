@@ -382,10 +382,10 @@ class FileListScreen extends StatefulWidget {
   });
 
   @override
-  FileListScreenState createState() => FileListScreenState();
+  State<FileListScreen> createState() => _FileListScreenState();
 }
 
-class FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
+class _FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
   List<FileSystemEntity> _files = [];
   Future<List<String>>? _fileCacheMap;
 
