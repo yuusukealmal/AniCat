@@ -53,6 +53,16 @@ mixin _Load {
     );
   }
 
+  Future<Directory> _getCacheImgFolder() async {
+    final Directory cacheDir = await getApplicationCacheDirectory();
+    var cachePath = Directory("${cacheDir.path}/img");
+    if (!await cachePath.exists()) {
+      await cachePath.create(recursive: true);
+    }
+
+    return cachePath;
+  }
+
   Future<String> _getThumbnail(File file) async {
     try {
       Uint8List? thumbnail = await VideoThumbnail.thumbnailData(
@@ -62,13 +72,13 @@ mixin _Load {
         quality: 100,
       );
       img.Image image = img.decodeImage(thumbnail!)!;
-      final cache = await getApplicationCacheDirectory();
       String hash = sha256
           .convert(
               utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
           .toString()
           .substring(0, 16);
-      var path = "${cache.path}/$hash.png";
+      var cacheImgFolder = await _getCacheImgFolder();
+      var path = "${cacheImgFolder.path}/$hash.png";
       debugPrint("Saving $path");
       File(path).writeAsBytesSync(img.encodePng(image));
       return path;
@@ -396,14 +406,14 @@ class FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
 
   Future<List<String>> _cacheImage(List<FileSystemEntity> files) async {
     List<String> hashMap = [];
-    final cache = await getApplicationCacheDirectory();
     for (var file in files) {
       String hash = sha256
           .convert(
               utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
           .toString()
           .substring(0, 16);
-      var path = "${cache.path}/$hash.png";
+      var cacheImgFolder = await _getCacheImgFolder();
+      var path = "${cacheImgFolder.path}/$hash.png";
       if (!await File(path).exists()) {
         debugPrint("Downloading ${file.path}");
         await _getThumbnail(file as File).then((value) => {hashMap.add(value)});
