@@ -1,15 +1,13 @@
 import 'dart:io';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as img;
-import 'package:flutter_video_view/flutter_video_view.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:anicat/functions/behavior/PathLoad.dart';
+import 'package:anicat/functions/behavior/ScreenRotate.dart';
 import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
 import 'package:anicat/functions/Calc.dart';
+import 'package:anicat/pages/SettingScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,86 +30,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-mixin _Load {
-  Future<List<FileSystemEntity>> _loadFiles(String folderPath) async {
-    final directory = Directory(folderPath);
-    var folders =
-        await directory.list().where((entity) => entity is File).toList();
-    return folders;
-  }
-
-  Future<void> _openFolder(BuildContext context, String folderPath) async {
-    final files = await _loadFiles(folderPath);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            FileListScreen(folderPath: folderPath, files: files),
-      ),
-    );
-  }
-
-  Future<Directory> _getCacheImgFolder() async {
-    final Directory cacheDir = await getApplicationCacheDirectory();
-    var cachePath = Directory("${cacheDir.path}/img");
-    if (!await cachePath.exists()) {
-      await cachePath.create(recursive: true);
-    }
-
-    return cachePath;
-  }
-
-  Future<String> _getThumbnail(File file) async {
-    try {
-      Uint8List? thumbnail = await VideoThumbnail.thumbnailData(
-        video: file.path,
-        imageFormat: ImageFormat.PNG,
-        timeMs: 720000,
-        quality: 100,
-      );
-      img.Image image = img.decodeImage(thumbnail!)!;
-      String hash = sha256
-          .convert(
-              utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
-          .toString()
-          .substring(0, 16);
-      var cacheImgFolder = await _getCacheImgFolder();
-      var path = "${cacheImgFolder.path}/$hash.png";
-      debugPrint("Saving $path");
-      File(path).writeAsBytesSync(img.encodePng(image));
-      return path;
-    } catch (e) {
-      debugPrint("Error ${e.toString()}");
-      return "";
-    }
-  }
-}
-
-mixin _Rotate {
-  void setPortraitMode() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-  }
-
-  void setLandscapeMode() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-  }
-
-  void enableRotation() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-  }
-}
-
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -121,7 +39,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with _Load, _Rotate {
+class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
   List<String> folders = [];
 
   @override
@@ -291,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage> with _Load, _Rotate {
             final folderPath = folders[index];
             final folderName = folderPath.split('/').last;
             return FutureBuilder(
-              future: _loadFiles(folderPath),
+              future: loadFiles(folderPath),
               builder: (context, snapshot) {
                 final files = snapshot.data;
                 if (files == null || files.isEmpty) {
@@ -301,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage> with _Load, _Rotate {
                   title: Text(folderName),
                   subtitle: Text("${files.length} Files"),
                   leading: const Icon(Icons.folder),
-                  onTap: () => _openFolder(context, folderPath),
+                  onTap: () => openFolder(context, folderPath),
                 );
               },
             );
@@ -315,205 +233,6 @@ class _MyHomePageState extends State<MyHomePage> with _Load, _Rotate {
         tooltip: 'Add Anime1 URL',
         child: const Icon(Icons.add),
       ),
-    );
-  }
-}
-
-class FileListScreen extends StatefulWidget {
-  final String folderPath;
-  final List<FileSystemEntity> files;
-
-  const FileListScreen({
-    super.key,
-    required this.folderPath,
-    required this.files,
-  });
-
-  @override
-  State<FileListScreen> createState() => _FileListScreenState();
-}
-
-class _FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
-  List<FileSystemEntity> _files = [];
-  Future<List<String>>? _fileCacheMap;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadFiles(widget.folderPath).then((value) => setState(() {
-          _files = value;
-          _fileCacheMap = _cacheImage(value);
-        }));
-  }
-
-  @override
-  void dispose() {
-    setPortraitMode();
-    super.dispose();
-  }
-
-  Future<List<String>> _cacheImage(List<FileSystemEntity> files) async {
-    List<String> hashMap = [];
-    for (var file in files) {
-      String hash = sha256
-          .convert(
-              utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
-          .toString()
-          .substring(0, 16);
-      var cacheImgFolder = await _getCacheImgFolder();
-      var path = "${cacheImgFolder.path}/$hash.png";
-      if (!await File(path).exists()) {
-        debugPrint("Downloading ${file.path}");
-        await _getThumbnail(file as File).then((value) => {hashMap.add(value)});
-      } else {
-        debugPrint("Cached ${file.path}");
-        hashMap.add(path);
-      }
-    }
-    return hashMap;
-  }
-
-  ListView _fileListView([List<String>? cacheThumbnail]) {
-    return ListView.builder(
-      itemCount: _files.length,
-      itemBuilder: (context, index) {
-        final file = _files[index] as File;
-        final fileName = file.path.split('/').last;
-        return ListTile(
-          title: Text(fileName),
-          subtitle: Text(getFileSize(file.lengthSync())),
-          leading: {
-                'mp4': cacheThumbnail?[index] != null &&
-                        cacheThumbnail?[index] != ""
-                    ? Image(image: FileImage(File(cacheThumbnail![index])))
-                    : const Icon(Icons.video_file),
-                'mkv': const Icon(Icons.video_file),
-                'webm': const Icon(Icons.video_file),
-                'jpg': const Icon(Icons.image),
-                'png': const Icon(Icons.image),
-                'jpeg': const Icon(Icons.image),
-                'gif': const Icon(Icons.gif),
-                'mp3': const Icon(Icons.music_note),
-                'wav': const Icon(Icons.music_note),
-                'aac': const Icon(Icons.music_note),
-                'ogg': const Icon(Icons.music_note),
-                'm4a': const Icon(Icons.music_note),
-                'flac': const Icon(Icons.music_note),
-                'mp4v': const Icon(Icons.video_file),
-                'mov': const Icon(Icons.video_file),
-                'wmv': const Icon(Icons.video_file),
-                'avi': const Icon(Icons.video_file),
-              }[fileName.split(".").last] ??
-              Icon(Icons.insert_drive_file),
-          onTap: () {
-            debugPrint('Tapped file: $fileName');
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => VideoPlayerScreen(filePath: file.path)),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.keyboard_backspace_sharp)),
-        title: Text(widget.folderPath.split('/').last),
-      ),
-      body: RefreshIndicator(
-          onRefresh: () =>
-              _loadFiles(widget.folderPath).then((value) => setState(() {
-                    _files = value;
-                  })),
-          child: FutureBuilder(
-              future: _fileCacheMap,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return _fileListView();
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                      child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.error_outline_rounded),
-                      Text("Progress Thumbnail Cache Failed")
-                    ],
-                  ));
-                }
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return _fileListView(snapshot.data!);
-                }
-                return SizedBox.shrink();
-              })),
-    );
-  }
-}
-
-class SettingScreen extends StatefulWidget {
-  const SettingScreen({super.key});
-
-  @override
-  State<SettingScreen> createState() => _SettingScreenState();
-}
-
-class _SettingScreenState extends State<SettingScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        leading: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: const Icon(Icons.keyboard_backspace_sharp)),
-        title: Text("Settings"),
-      ),
-    );
-  }
-}
-
-class VideoPlayerScreen extends StatefulWidget {
-  final String filePath;
-  const VideoPlayerScreen({super.key, required this.filePath});
-
-  @override
-  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
-}
-
-class _VideoPlayerScreenState extends State<VideoPlayerScreen> with _Rotate {
-  @override
-  void initState() {
-    setLandscapeMode();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    setPortraitMode();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final VideoPlayerController videoPlayerController =
-        VideoPlayerController.file(File(widget.filePath));
-
-    return VideoView(
-      controller: VideoController(
-          videoPlayerController: videoPlayerController,
-          videoConfig: VideoConfig()),
     );
   }
 }
