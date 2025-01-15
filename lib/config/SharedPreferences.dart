@@ -56,7 +56,7 @@ class SharedPreferencesHelper {
     return _prefs?.remove(key) ?? Future.value(false);
   }
 
-  static Future<bool> clearAll() async {
+  static Future<bool> delete() async {
     return _prefs?.clear() ?? Future.value(false);
   }
 }

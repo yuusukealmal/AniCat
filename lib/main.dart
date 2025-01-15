@@ -54,12 +54,12 @@ class _MyAppState extends State<MyApp> {
     }
 
     return MaterialApp(
-      title: 'AniCat Downloader',
+      title: "AniCat Downloader",
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: _seedColor!),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'AniCat'),
+      home: const MyHomePage(title: "AniCat"),
     );
   }
 }
