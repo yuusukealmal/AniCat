@@ -275,6 +275,10 @@ class _MyHomePageState extends State<MyHomePage> with _Load, _Rotate {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         leading: IconButton(
             onPressed: () async {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingScreen()),
+              );
             },
             icon: const Icon(Icons.menu)),
         title: Text(widget.title),
@@ -452,6 +456,30 @@ class _FileListScreenState extends State<FileListScreen> with _Load, _Rotate {
                 }
                 return SizedBox.shrink();
               })),
+    );
+  }
+}
+
+class SettingScreen extends StatefulWidget {
+  const SettingScreen({super.key});
+
+  @override
+  State<SettingScreen> createState() => _SettingScreenState();
+}
+
+class _SettingScreenState extends State<SettingScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        leading: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.keyboard_backspace_sharp)),
+        title: Text("Settings"),
+      ),
     );
   }
 }
