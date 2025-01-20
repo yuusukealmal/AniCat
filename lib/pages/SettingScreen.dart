@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:provider/provider.dart';
 import 'package:anicat/config/SharedPreferences.dart';
+import 'package:anicat/functions/behavior/SettingChange.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -9,7 +11,7 @@ class SettingScreen extends StatefulWidget {
   State<SettingScreen> createState() => _SettingScreenState();
 }
 
-class _SettingScreenState extends State<SettingScreen> {
+class _SettingScreenState extends State<SettingScreen> with ChangeNotifier {
   int? selectedColor;
   @override
   Widget build(BuildContext context) {
@@ -44,9 +46,7 @@ class _SettingScreenState extends State<SettingScreen> {
                               pickerColor: Color(selectedColor ??
                                   Theme.of(context).colorScheme.primary.value),
                               onColorChanged: (Color color) {
-                                setState(() {
-                                  selectedColor = color.value;
-                                });
+                                selectedColor = color.value;
                               },
                             ),
                           ),
@@ -58,27 +58,10 @@ class _SettingScreenState extends State<SettingScreen> {
                             TextButton(
                               child: const Text('OK'),
                               onPressed: () async {
-                                await SharedPreferencesHelper.setInt(
-                                    "Home.Color",
-                                    selectedColor ??
-                                        Theme.of(context)
-                                            .colorScheme
-                                            .primary
-                                            .value);
-                                setState(() {
-                                  final ThemeData themeData = ThemeData(
-                                    colorScheme: ColorScheme.fromSeed(
-                                      seedColor: Color(selectedColor ??
-                                          Theme.of(context)
-                                              .colorScheme
-                                              .primary
-                                              .value),
-                                    ),
-                                  );
-                                  Theme.of(super.context).copyWith(
-                                    colorScheme: themeData.colorScheme,
-                                  );
-                                });
+                                final colorNotifier =
+                                    Provider.of<ColorNotifier>(context,
+                                        listen: false);
+                                colorNotifier.setColor(Color(selectedColor!));
                                 Navigator.of(context).pop();
                               },
                             ),
@@ -98,9 +81,9 @@ class _SettingScreenState extends State<SettingScreen> {
                             context: context,
                             builder: (BuildContext context) => AlertDialog(
                                     title:
-                                        const Text("Clear Shared Preferences"),
+                                        const Text("Reset Shared Preferences"),
                                     content: const Text(
-                                        "Are you sure you want to clear shared preferences?"),
+                                        "Are you sure you want to Reset shared preferences?"),
                                     actions: [
                                       TextButton(
                                         child: const Text("Cancel"),
@@ -108,10 +91,16 @@ class _SettingScreenState extends State<SettingScreen> {
                                             Navigator.of(context).pop(),
                                       ),
                                       TextButton(
-                                        child: const Text("Clear"),
+                                        child: const Text("Reset"),
                                         onPressed: () async {
-                                          await SharedPreferencesHelper
-                                              .delete();
+                                          await SharedPreferencesHelper.reset();
+                                          final colorNotifier =
+                                              Provider.of<ColorNotifier>(
+                                                  context,
+                                                  listen: false);
+                                          colorNotifier.setColor(Color(
+                                              await SharedPreferencesHelper
+                                                  .getInt("Home.Color")!));
                                           Navigator.of(context).pop();
                                         },
                                       )

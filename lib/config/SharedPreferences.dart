@@ -1,6 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SharedPreferencesHelper {
+class SharedPreferencesHelper with ChangeNotifier {
   static final SharedPreferencesHelper _instance =
       SharedPreferencesHelper._internal();
   factory SharedPreferencesHelper() => _instance;
@@ -58,5 +59,10 @@ class SharedPreferencesHelper {
 
   static Future<bool> delete() async {
     return _prefs?.clear() ?? Future.value(false);
+  }
+
+  static Future<void> reset() async {
+    _prefs?.clear();
+    _prefs?.setInt("Home.Color", Color.fromARGB(255, 183, 58, 156).value);
   }
 }

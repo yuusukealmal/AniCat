@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/functions/behavior/PathLoad.dart';
@@ -9,6 +10,7 @@ import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
 import 'package:anicat/functions/Calc.dart';
 import 'package:anicat/pages/SettingScreen.dart';
+import 'package:anicat/functions/behavior/SettingChange.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,43 +26,33 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Color? _seedColor;
-
-  Future<Color> _getSeedColor() async {
-    final colorValue = SharedPreferencesHelper.getInt("Home.Color");
-    if (colorValue != null) {
-      return Color(colorValue);
-    } else {
-      const defaultColor = Color.fromARGB(255, 183, 58, 156);
-      await SharedPreferencesHelper.setInt('seedColor', defaultColor.value);
-      return defaultColor;
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    _getSeedColor().then((color) {
-      setState(() {
-        _seedColor = color;
-      });
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_seedColor == null) {
-      return const CircularProgressIndicator();
-    }
-
-    return MaterialApp(
-      title: "AniCat Downloader",
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: _seedColor!),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: "AniCat"),
-    );
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) {
+            final colorNotifier = ColorNotifier();
+            colorNotifier.init();
+            return colorNotifier;
+          }),
+        ],
+        builder: (context, child) {
+          final color = Provider.of<ColorNotifier>(context);
+          return MaterialApp(
+            title: "AniCat Downloader",
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                  seedColor: color.color ?? Color.fromARGB(255, 183, 58, 156)),
+              useMaterial3: true,
+            ),
+            home: const MyHomePage(title: "AniCat"),
+          );
+        });
   }
 }
 
