@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:anicat/config/SharedPreferences.dart';
-import 'package:anicat/functions/behavior/SettingChange.dart';
+import 'package:anicat/config/notifier/SettingChange.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -11,8 +11,9 @@ class SettingScreen extends StatefulWidget {
   State<SettingScreen> createState() => _SettingScreenState();
 }
 
-class _SettingScreenState extends State<SettingScreen> with ChangeNotifier {
+class _SettingScreenState extends State<SettingScreen> {
   int? selectedColor;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

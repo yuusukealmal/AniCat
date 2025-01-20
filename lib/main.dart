@@ -10,7 +10,7 @@ import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
 import 'package:anicat/functions/Calc.dart';
 import 'package:anicat/pages/SettingScreen.dart';
-import 'package:anicat/functions/behavior/SettingChange.dart';
+import 'package:anicat/config/notifier/SettingChange.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
