@@ -7,8 +7,15 @@ import 'package:crypto/crypto.dart';
 import 'package:image/image.dart' as img;
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:anicat/pages/FileListScreen.dart';
+import 'package:anicat/config/SharedPreferences.dart';
 
 mixin Load {
+  Future<Directory> getDownloadPath() async {
+    String path = SharedPreferencesHelper.getString("Anime.DownloadPath") ??
+        (await getExternalStorageDirectory())!.path;
+    return Directory(path);
+  }
+
   Future<List<FileSystemEntity>> loadFiles(String folderPath) async {
     final directory = Directory(folderPath);
     var folders =

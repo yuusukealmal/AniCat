@@ -50,14 +50,15 @@ mixin StoragePermission {
     );
   }
 
-  Future<void> checkPermission(BuildContext context) async {
+  Future<String?> checkPermission(BuildContext context) async {
     String access = await _checkManageStoragePermission();
     if (access == "isRestricted" || access == "isDenied") {
       await _askManageStoragePermission(context);
     } else if (access == "isPermanentlyDenied") {
       await openAppSettings();
     } else if (access == "Granted") {
-      await _chooseSavingFolder(context);
+      return await _chooseSavingFolder(context);
     }
+    return null;
   }
 }

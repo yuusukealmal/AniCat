@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
+import 'package:anicat/functions/behavior/PathLoad.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:anicat/downloader/CookieHandle.dart';
 
 class Anime {
@@ -49,7 +49,7 @@ class Anime {
   }
 }
 
-class MP4 extends Anime {
+class MP4 extends Anime with Load {
   MP4({required super.folder, required super.url});
 
   int chunk = 10240;
@@ -59,8 +59,8 @@ class MP4 extends Anime {
       StreamController<double>();
 
   Future<Directory> getPath() async {
-    final root = await getExternalStorageDirectory();
-    var f = Directory('${root!.path}/$folder');
+    final root = await getDownloadPath();
+    var f = Directory('$root/$folder');
     if (!await f.exists()) {
       await f.create(recursive: true);
     }

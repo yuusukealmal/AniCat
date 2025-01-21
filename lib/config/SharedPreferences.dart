@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesHelper with ChangeNotifier {
@@ -64,5 +65,7 @@ class SharedPreferencesHelper with ChangeNotifier {
   static Future<void> reset() async {
     _prefs?.clear();
     _prefs?.setInt("Home.Color", Color.fromARGB(255, 183, 58, 156).value);
+    _prefs?.setString(
+        "Anime.DownloadPath", (await getExternalStorageDirectory())!.path);
   }
 }

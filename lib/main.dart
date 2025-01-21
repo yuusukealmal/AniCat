@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/functions/behavior/PathLoad.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
@@ -75,13 +73,8 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
   }
 
   Future<void> _loadFolders() async {
-    final root = await getExternalStorageDirectory();
-    if (root == null) {
-      debugPrint('No external storage found.');
-      return;
-    }
+    final directory = await getDownloadPath();
 
-    final directory = Directory(root.path);
     final folderList = await directory
         .list()
         .where((entity) => entity is Directory)
