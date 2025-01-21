@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:anicat/config/SharedPreferences.dart';
-import 'package:anicat/config/notifier/SettingChange.dart';
+import 'package:anicat/config/notifier/HomeColorNotifier.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
