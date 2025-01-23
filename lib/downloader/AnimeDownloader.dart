@@ -60,7 +60,7 @@ class MP4 extends Anime with Load {
 
   Future<Directory> getPath() async {
     final root = await getDownloadPath();
-    var f = Directory('$root/$folder');
+    var f = Directory('${root.path}/$folder');
     if (!await f.exists()) {
       await f.create(recursive: true);
     }
