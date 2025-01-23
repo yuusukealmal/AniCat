@@ -86,66 +86,110 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
                   }
                   urls = urls.reversed.toList();
                   var folder = urls.removeAt(0);
-                  if (mounted) {
-                    showDialog(
-                      context: super.context,
-                      barrierDismissible: false,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Downloading Anime: $folder'),
-                          content: const LinearProgressIndicator(),
-                        );
-                      },
-                    );
-                  }
                   for (var url in urls) {
                     var anime = MP4(folder: folder, url: url);
                     await anime.init();
                     debugPrint("Get Started for ${anime.title}");
-                    Future.delayed(const Duration(seconds: 3), () {});
-                    if (mounted) {
-                      showDialog(
-                        context: super.context,
-                        barrierDismissible: false,
-                        builder: (BuildContext context) {
-                          bool dialogClosed = false;
-                          return StreamBuilder<double>(
-                            stream: anime.progressStream,
-                            initialData: 0.0,
-                            builder: (context, snapshot) {
-                              final progress = snapshot.data ?? 0.0;
-                              if (progress >= 1.0 && !dialogClosed) {
-                                dialogClosed = true;
-                                WidgetsBinding.instance
-                                    .addPostFrameCallback((_) {
-                                  if (Navigator.canPop(context)) {
-                                    Navigator.of(context).pop();
-                                  }
-                                });
-                              }
-                              return AlertDialog(
-                                title: Text('Downloading ${anime.title}'),
-                                content: Column(
+
+                    double _progress = 0.0;
+                    int _current = 0;
+                    bool _isOverlayVisible = false;
+
+                    OverlayEntry? overlayEntry;
+
+                    void updateOverlay() {
+                      overlayEntry?.markNeedsBuild();
+                    }
+
+                    if (!_isOverlayVisible) {
+                      _isOverlayVisible = true;
+
+                      overlayEntry = OverlayEntry(
+                        builder: (context) {
+                          return Positioned(
+                            bottom: 50,
+                            left: 20,
+                            right: 20,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.8),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Column(
                                   mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    LinearProgressIndicator(value: progress),
-                                    const SizedBox(height: 10),
                                     Text(
-                                        '${convertMB(anime.current)}/${convertMB(anime.size)}  ${(progress * 100).toStringAsFixed(2)}% Completed'),
+                                      'Downloading ${anime.title}',
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    LinearProgressIndicator(value: _progress),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '${convertMB(_current)}/${convertMB(anime.size)}  '
+                                      '${(_progress * 100).toStringAsFixed(2)}% Completed',
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                    // Align(
+                                    //   alignment: Alignment.centerRight,
+                                    //   child: TextButton(
+                                    //     onPressed: () {
+                                    //       // 停止下載的邏輯
+                                    //       debugPrint("Download Cancelled");
+                                    //       overlayEntry?.remove();
+                                    //       _isOverlayVisible = false;
+                                    //     },
+                                    //     child: const Text(
+                                    //       'Cancel',
+                                    //       style: TextStyle(color: Colors.red),
+                                    //     ),
+                                    //   ),
+                                    // ),
                                   ],
                                 ),
-                              );
-                            },
+                              ),
+                            ),
                           );
                         },
                       );
+
+                      Overlay.of(super.context).insert(overlayEntry);
                     }
+
+                    anime.progressStream.listen((progress) {
+                      _progress = progress;
+                      _current = anime.current;
+
+                      updateOverlay();
+
+                      if (_progress >= 1.0) {
+                        debugPrint("Download Completed");
+
+                        overlayEntry?.remove();
+                        _isOverlayVisible = false;
+
+                        ScaffoldMessenger.of(super.context)
+                            .showSnackBar(const SnackBar(
+                          content: Text("Download Completed"),
+                          duration: Duration(seconds: 3),
+                        ));
+                      }
+                    });
+
                     await anime.download();
+
+                    if (_isOverlayVisible) {
+                      overlayEntry.remove();
+                      _isOverlayVisible = false;
+                    }
                   }
-                  if (mounted && Navigator.canPop(super.context)) {
-                    debugPrint("Download Completed");
-                    Navigator.of(super.context).pop();
-                  }
+                  debugPrint("Download Completed");
                 }).catchError((error) {
                   debugPrint(error.toString());
                 });
