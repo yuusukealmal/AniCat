@@ -23,15 +23,17 @@ class FileListScreen extends StatefulWidget {
 
 class _FileListScreenState extends State<FileListScreen> with Load, Rotate {
   List<FileSystemEntity> _files = [];
-  Future<List<String>>? _fileCacheMap;
+  List<String> _fileCacheMap = [];
 
   @override
   void initState() {
     super.initState();
-    loadFiles(widget.folderPath).then((value) => setState(() {
-          _files = value;
-          _fileCacheMap = _cacheImage(value);
-        }));
+    loadFiles(widget.folderPath).then((value) {
+      setState(() {
+        _files = value;
+      });
+      _cacheImage(value);
+    });
   }
 
   @override
@@ -40,8 +42,7 @@ class _FileListScreenState extends State<FileListScreen> with Load, Rotate {
     super.dispose();
   }
 
-  Future<List<String>> _cacheImage(List<FileSystemEntity> files) async {
-    List<String> hashMap = [];
+  Future<void> _cacheImage(List<FileSystemEntity> files) async {
     for (var file in files) {
       String hash = sha256
           .convert(
@@ -52,16 +53,20 @@ class _FileListScreenState extends State<FileListScreen> with Load, Rotate {
       var path = "${cacheImgFolder.path}/$hash.png";
       if (!await File(path).exists()) {
         debugPrint("Downloading ${file.path}");
-        await getThumbnail(file as File).then((value) => {hashMap.add(value)});
+        var thumbnailPath = await getThumbnail(file as File);
+        setState(() {
+          _fileCacheMap.add(thumbnailPath);
+        });
       } else {
         debugPrint("Cached ${file.path}");
-        hashMap.add(path);
+        setState(() {
+          _fileCacheMap.add(path);
+        });
       }
     }
-    return hashMap;
   }
 
-  ListView _fileListView([List<String>? cacheThumbnail]) {
+  ListView _fileListView() {
     return ListView.builder(
       itemCount: _files.length,
       itemBuilder: (context, index) {
@@ -71,9 +76,9 @@ class _FileListScreenState extends State<FileListScreen> with Load, Rotate {
           title: Text(fileName),
           subtitle: Text(getFileSize(file.lengthSync())),
           leading: {
-                'mp4': cacheThumbnail?[index] != null &&
-                        cacheThumbnail?[index] != ""
-                    ? Image(image: FileImage(File(cacheThumbnail![index])))
+                'mp4': _fileCacheMap.length > index &&
+                        _fileCacheMap[index].isNotEmpty
+                    ? Image(image: FileImage(File(_fileCacheMap[index])))
                     : const Icon(Icons.video_file),
                 'mkv': const Icon(Icons.video_file),
                 'webm': const Icon(Icons.video_file),
@@ -119,31 +124,14 @@ class _FileListScreenState extends State<FileListScreen> with Load, Rotate {
         title: Text(widget.folderPath.split('/').last),
       ),
       body: RefreshIndicator(
-          onRefresh: () =>
-              loadFiles(widget.folderPath).then((value) => setState(() {
-                    _files = value;
-                  })),
-          child: FutureBuilder(
-              future: _fileCacheMap,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return _fileListView();
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                      child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.error_outline_rounded),
-                      Text("Progress Thumbnail Cache Failed")
-                    ],
-                  ));
-                }
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return _fileListView(snapshot.data!);
-                }
-                return SizedBox.shrink();
-              })),
+        onRefresh: () => loadFiles(widget.folderPath).then((value) {
+          setState(() {
+            _files = value;
+          });
+          _cacheImage(value);
+        }),
+        child: _fileListView(),
+      ),
     );
   }
 }
