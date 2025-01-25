@@ -158,10 +158,11 @@ packages:
   flutter_video_view:
     dependency: "direct main"
     description:
-      name: flutter_video_view
-      sha256: bcfcb6aade02d1a3c5def22ac81b720071b0697b537203f794baf25f79edc008
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: main
+      resolved-ref: "18aedfa007c47822c43a2d1baedbb496885f1083"
+      url: "https://github.com/yuusukealmal/flutter_video_view.git"
+    source: git
     version: "2.1.1"
   flutter_web_plugins:
     dependency: transitive

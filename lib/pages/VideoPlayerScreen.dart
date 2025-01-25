@@ -12,6 +12,7 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> with Rotate {
+  VideoPlayerController? _videoPlayerController;
   @override
   void initState() {
     setLandscapeMode();
@@ -20,19 +21,23 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> with Rotate {
 
   @override
   void dispose() {
+    _videoPlayerController?.dispose();
     setPortraitMode();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final VideoPlayerController videoPlayerController =
-        VideoPlayerController.file(File(widget.filePath));
+    _videoPlayerController = VideoPlayerController.file(File(widget.filePath));
 
     return VideoView(
       controller: VideoController(
-          videoPlayerController: videoPlayerController,
-          videoConfig: VideoConfig()),
+          videoPlayerController: _videoPlayerController!,
+          videoConfig: VideoConfig(
+              title: widget.filePath.split('/').last,
+              showLock: true,
+              autoPlay: true,
+              fullScreenByDefault: true)),
     );
   }
 }
