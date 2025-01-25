@@ -217,12 +217,73 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
                 if (files == null || files.isEmpty) {
                   return const SizedBox.shrink();
                 }
-                return ListTile(
-                  title: Text(folderName),
-                  subtitle: Text("${files.length} Files"),
-                  leading: const Icon(Icons.folder),
-                  onTap: () => openFolder(context, folderPath),
-                );
+                return GestureDetector(
+                    child: ListTile(
+                      title: Text(folderName),
+                      subtitle: Text("${files.length} Files"),
+                      leading: const Icon(Icons.folder),
+                      onTap: () => openFolder(context, folderPath),
+                    ),
+                    onLongPressStart: (details) {
+                      final Offset position = details.globalPosition;
+                      showMenu(
+                        context: context,
+                        position: RelativeRect.fromLTRB(
+                            position.dx, position.dy, position.dx, 0),
+                        items: [
+                          PopupMenuItem(
+                              value: 'properties',
+                              child: ListTile(
+                                title: Text('屬性'),
+                                leading: const Icon(Icons.info),
+                              )),
+                          PopupMenuItem(
+                              value: 'delete',
+                              child: ListTile(
+                                title: Text('刪除資料夾'),
+                                leading: const Icon(Icons.delete),
+                              )),
+                        ],
+                      ).then((value) {
+                        if (value == 'properties') {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                    title: Text(folderName),
+                                    content: Text(
+                                      "影片數量: ${files.length}\n總大小: ${convertMB(files.fold(0, (total, file) => total + (file as File).lengthSync()))}",
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                          child: Text("關閉"),
+                                          onPressed: () =>
+                                              Navigator.of(context).pop()),
+                                    ],
+                                  ));
+                        } else if (value == 'delete') {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                    title: Text("刪除資料夾"),
+                                    content: Text("確定要刪除資料夾嗎?"),
+                                    actions: [
+                                      TextButton(
+                                          child: Text("取消"),
+                                          onPressed: () =>
+                                              Navigator.of(context).pop()),
+                                      TextButton(
+                                          child: Text("刪除"),
+                                          onPressed: () {
+                                            for (var file in files) {
+                                              (file as File).deleteSync();
+                                            }
+                                            Navigator.of(context).pop();
+                                          }),
+                                    ],
+                                  ));
+                        }
+                      });
+                    });
               },
             );
           },
