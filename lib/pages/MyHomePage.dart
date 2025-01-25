@@ -136,21 +136,6 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
                                       style:
                                           const TextStyle(color: Colors.white),
                                     ),
-                                    // Align(
-                                    //   alignment: Alignment.centerRight,
-                                    //   child: TextButton(
-                                    //     onPressed: () {
-                                    //       // 停止下載的邏輯
-                                    //       debugPrint("Download Cancelled");
-                                    //       overlayEntry?.remove();
-                                    //       _isOverlayVisible = false;
-                                    //     },
-                                    //     child: const Text(
-                                    //       'Cancel',
-                                    //       style: TextStyle(color: Colors.red),
-                                    //     ),
-                                    //   ),
-                                    // ),
                                   ],
                                 ),
                               ),

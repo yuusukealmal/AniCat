@@ -49,7 +49,7 @@ class _FileListScreenState extends State<FileListScreen> with Load, Rotate {
               utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
           .toString()
           .substring(0, 16);
-      var cacheImgFolder = await getCacheImgFolder();
+      var cacheImgFolder = await Load.getCacheImgFolder();
       var path = "${cacheImgFolder.path}/$hash.png";
       if (!await File(path).exists()) {
         debugPrint("Downloading ${file.path}");
