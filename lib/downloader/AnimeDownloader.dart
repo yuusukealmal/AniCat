@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
-import 'package:anicat/functions/behavior/PathLoad.dart';
+import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -49,7 +49,7 @@ class Anime {
   }
 }
 
-class MP4 extends Anime with Load {
+class MP4 extends Anime with PathHandle {
   MP4({required super.folder, required super.url});
 
   int chunk = 10240;
@@ -59,7 +59,7 @@ class MP4 extends Anime with Load {
       StreamController<double>();
 
   Future<Directory> getPath() async {
-    final root = await getDownloadPath();
+    final root = await PathHandle.getDownloadPath();
     var f = Directory('${root.path}/$folder');
     if (!await f.exists()) {
       await f.create(recursive: true);

@@ -2,7 +2,8 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:anicat/functions/behavior/PathLoad.dart';
+import 'package:anicat/functions/behavior/PathHandle.dart';
+import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
 import 'package:anicat/functions/Calc.dart';
 import 'package:anicat/functions/GetLeading.dart';
@@ -22,7 +23,8 @@ class FileListScreen extends StatefulWidget {
   State<FileListScreen> createState() => _FileListScreenState();
 }
 
-class _FileListScreenState extends State<FileListScreen> with Load, Rotate {
+class _FileListScreenState extends State<FileListScreen>
+    with PathHandle, ImgCache, ScreenRotate {
   List<FileSystemEntity> _files = [];
   List<String> _fileCacheMap = [];
 
@@ -50,7 +52,7 @@ class _FileListScreenState extends State<FileListScreen> with Load, Rotate {
               utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
           .toString()
           .substring(0, 16);
-      var cacheImgFolder = await Load.getCacheImgFolder();
+      var cacheImgFolder = await ImgCache.getImgCacheFolder();
       var path = "${cacheImgFolder.path}/$hash.png";
       if (!await File(path).exists()) {
         debugPrint("Downloading ${file.path}");

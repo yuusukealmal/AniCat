@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/config/StoragePermission.dart';
-import 'package:anicat/functions/behavior/PathLoad.dart';
+import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/functions/behavior/SettingScreenonPress.dart';
 
 class SettingScreen extends StatefulWidget {
@@ -12,7 +12,7 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen>
-    with Load, StoragePermission {
+    with PathHandle, StoragePermission {
   int? selectedColor;
 
   @override
@@ -46,7 +46,7 @@ class _SettingScreenState extends State<SettingScreen>
                   ),
                 ),
                 FutureBuilder(
-                  future: getDownloadPath(),
+                  future: PathHandle.getDownloadPath(),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return GestureDetector(

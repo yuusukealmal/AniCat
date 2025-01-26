@@ -1,40 +1,13 @@
 import 'dart:io';
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart';
 import 'package:image/image.dart' as img;
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:anicat/pages/FileListScreen.dart';
-import 'package:anicat/config/SharedPreferences.dart';
 
-mixin Load {
-  Future<Directory> getDownloadPath() async {
-    String path = SharedPreferencesHelper.getString("Anime.DownloadPath") ??
-        (await getExternalStorageDirectory())!.path;
-    return Directory(path);
-  }
-
-  Future<List<FileSystemEntity>> loadFiles(String folderPath) async {
-    final directory = Directory(folderPath);
-    var folders =
-        await directory.list().where((entity) => entity is File).toList();
-    return folders;
-  }
-
-  Future<void> openFolder(BuildContext context, String folderPath) async {
-    final files = await loadFiles(folderPath);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            FileListScreen(folderPath: folderPath, files: files),
-      ),
-    );
-  }
-
-  static Future<Directory> getCacheImgFolder() async {
+mixin ImgCache {
+  static Future<Directory> getImgCacheFolder() async {
     final Directory cacheDir = await getApplicationCacheDirectory();
     var cachePath = Directory("${cacheDir.path}/img");
     if (!await cachePath.exists()) {
@@ -71,7 +44,7 @@ mixin Load {
         .toString()
         .substring(0, 16);
 
-    var cacheImgFolder = await getCacheImgFolder();
+    var cacheImgFolder = await getImgCacheFolder();
     var path = "${cacheImgFolder.path}/$hash.png";
 
     File(path).writeAsBytesSync(img.encodePng(image));

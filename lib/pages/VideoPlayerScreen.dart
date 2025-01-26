@@ -12,7 +12,8 @@ class VideoPlayerScreen extends StatefulWidget {
   State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
 }
 
-class _VideoPlayerScreenState extends State<VideoPlayerScreen> with Rotate {
+class _VideoPlayerScreenState extends State<VideoPlayerScreen>
+    with ScreenRotate {
   VideoPlayerController? _videoPlayerController;
   bool atuoPlay = SharedPreferencesHelper.getBool("Video.AutoPlay") ?? false;
   bool fullScreen =

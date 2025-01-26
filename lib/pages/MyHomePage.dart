@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:anicat/functions/behavior/PathLoad.dart';
+import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
 import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
@@ -16,7 +16,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
+class _MyHomePageState extends State<MyHomePage> with PathHandle, ScreenRotate {
   List<String> folders = [];
 
   @override
@@ -26,7 +26,7 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
   }
 
   Future<void> _loadFolders() async {
-    final directory = await getDownloadPath();
+    final directory = await PathHandle.getDownloadPath();
 
     final folderList = await directory
         .list()
