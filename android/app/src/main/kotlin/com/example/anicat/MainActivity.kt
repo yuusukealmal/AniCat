@@ -1,4 +1,4 @@
-package com.example.anicat
+package com.anicat.example
 
 import io.flutter.embedding.android.FlutterActivity
 
