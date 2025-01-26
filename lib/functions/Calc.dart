@@ -9,6 +9,6 @@ String convertMB(int length) {
 String getFileSize(int length) {
   if (length <= 0) return "0 B";
   const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-  var i = (log(length) / log(1024)).floor();
+  int i = (log(length) / log(1024)).floor();
   return "${(length / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}";
 }

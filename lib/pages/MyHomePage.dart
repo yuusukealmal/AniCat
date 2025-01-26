@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:anicat/functions/behavior/PathLoad.dart';
+import 'package:anicat/functions/behavior/PathHandle.dart';
+import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
 import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
@@ -16,7 +17,8 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
+class _MyHomePageState extends State<MyHomePage>
+    with PathHandle, ImgCache, ScreenRotate {
   List<String> folders = [];
 
   @override
@@ -26,7 +28,7 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
   }
 
   Future<void> _loadFolders() async {
-    final directory = await getDownloadPath();
+    final directory = await PathHandle.getDownloadPath();
 
     final folderList = await directory
         .list()
@@ -66,8 +68,7 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
                     controller: textController,
                     decoration: const InputDecoration(
                       hintText: 'Enter URL here',
-                      hintStyle: TextStyle(
-                          color: Colors.white54),
+                      hintStyle: TextStyle(color: Colors.white54),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white),
                       ),
@@ -156,9 +157,9 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
                               }
                             }
                             urls = urls.reversed.toList();
-                            var folder = urls.removeAt(0);
-                            for (var url in urls) {
-                              var anime = MP4(folder: folder, url: url);
+                            String folder = urls.removeAt(0);
+                            for (String url in urls) {
+                              MP4 anime = MP4(folder: folder, url: url);
                               await anime.init();
                               debugPrint("Get Started for ${anime.title}");
 
@@ -222,7 +223,7 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
                                 Overlay.of(super.context).insert(overlayEntry);
                               }
 
-                              anime.progressStream.listen((progress) {
+                              anime.progressStream.listen((progress) async {
                                 _progress = progress;
                                 _current = anime.current;
 
@@ -230,6 +231,19 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
 
                                 if (_progress >= 1.0) {
                                   debugPrint("Download Completed");
+                                  await _loadFolders();
+
+                                  Directory animeFolder =
+                                      await PathHandle.getDownloadPath();
+                                  String path =
+                                      "${animeFolder.path}/$folder/${anime.title}.mp4";
+                                  Directory cacheImgFolder =
+                                      await ImgCache.getImgCacheFolder();
+                                  String imgCachepath =
+                                      "${cacheImgFolder.path}/${getHash(anime.title!)}.png";
+                                  if (!File(imgCachepath).existsSync()) {
+                                    await getThumbnail(File(path));
+                                  }
 
                                   overlayEntry?.remove();
                                   _isOverlayVisible = false;
@@ -429,10 +443,11 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
                                             const SizedBox(width: 8),
                                             TextButton(
                                               onPressed: () {
-                                                for (var file in files) {
+                                                for (FileSystemEntity file in files) {
                                                   (file as File).deleteSync();
                                                 }
                                                 Navigator.of(context).pop();
+                                                setState(() {});
                                               },
                                               child: const Text(
                                                 "刪除",

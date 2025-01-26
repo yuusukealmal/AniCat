@@ -25,7 +25,7 @@ class Config {
 
   static Future<File> _writeConfig(String desc, dynamic value,
       [bool isList = false]) async {
-    var json = jsonDecode(await _readConfig());
+    dynamic json = jsonDecode(await _readConfig());
     if (isList) {
       json[desc].append(value);
     } else {

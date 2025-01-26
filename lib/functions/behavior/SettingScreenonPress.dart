@@ -1,7 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
-import 'package:anicat/functions/behavior/PathLoad.dart';
+import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/config/notifier/HomeColorNotifier.dart';
 
@@ -191,8 +192,8 @@ Future<dynamic> onClearCache(BuildContext context) async {
                     const SizedBox(width: 8),
                     TextButton(
                       onPressed: () async {
-                        final cache = await Load.getCacheImgFolder();
-                        await for (var entity in cache.list()) {
+                        final cache = await ImgCache.getImgCacheFolder();
+                        await for (FileSystemEntity entity in cache.list()) {
                           await entity.delete(recursive: true);
                         }
                         Navigator.of(context).pop();

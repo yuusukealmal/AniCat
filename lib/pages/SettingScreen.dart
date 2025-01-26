@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/config/StoragePermission.dart';
-import 'package:anicat/functions/behavior/PathLoad.dart';
+import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/functions/behavior/SettingScreenonPress.dart';
 
 class SettingScreen extends StatefulWidget {
@@ -12,7 +12,7 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen>
-    with Load, StoragePermission {
+    with PathHandle, StoragePermission {
   int? selectedColor;
 
   @override
@@ -33,6 +33,7 @@ class _SettingScreenState extends State<SettingScreen>
           child: ListView(children: [
             ExpansionTile(
               title: Text("Basic Settings"),
+              initiallyExpanded: true,
               children: [
                 GestureDetector(
                   onTap: () => onChangeColoronPress(context, selectedColor),
@@ -45,7 +46,7 @@ class _SettingScreenState extends State<SettingScreen>
                   ),
                 ),
                 FutureBuilder(
-                  future: getDownloadPath(),
+                  future: PathHandle.getDownloadPath(),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return GestureDetector(
@@ -57,7 +58,7 @@ class _SettingScreenState extends State<SettingScreen>
                                 child: Icon(Icons.folder)),
                           ),
                           onTap: () async {
-                            var changeDownloadPath =
+                            String? changeDownloadPath =
                                 await checkPermission(context);
                             if (changeDownloadPath != null) {
                               await SharedPreferencesHelper.setString(
@@ -98,30 +99,34 @@ class _SettingScreenState extends State<SettingScreen>
                     onTap: () => onClearCache(context)),
               ],
             ),
-            ExpansionTile(title: Text("Video Settings"), children: [
-              ListTile(
-                  title: Text("Auto Play"),
-                  trailing: Switch(
-                    value: SharedPreferencesHelper.getBool("Video.AutoPlay") ??
-                        false,
-                    onChanged: (value) async {
-                      await SharedPreferencesHelper.setBool(
-                          "Video.AutoPlay", value);
-                      if (!value) {
-                        await SharedPreferencesHelper.setBool(
-                            "Video.FullScreen", false);
-                      }
-                      setState(() {});
-                    },
-                  )),
-              ListTile(
-                title: Text("Fullscreen by Default"),
-                trailing: Switch(
-                    value:
-                        SharedPreferencesHelper.getBool("Video.FullScreen") ??
+            ExpansionTile(
+                title: Text("Video Settings"),
+                initiallyExpanded: true,
+                children: [
+                  ListTile(
+                      title: Text("Auto Play"),
+                      trailing: Switch(
+                        value:
+                            SharedPreferencesHelper.getBool("Video.AutoPlay") ??
+                                false,
+                        onChanged: (value) async {
+                          await SharedPreferencesHelper.setBool(
+                              "Video.AutoPlay", value);
+                          if (!value) {
+                            await SharedPreferencesHelper.setBool(
+                                "Video.FullScreen", false);
+                          }
+                          setState(() {});
+                        },
+                      )),
+                  ListTile(
+                    title: Text("Fullscreen by Default"),
+                    trailing: Switch(
+                        value: SharedPreferencesHelper.getBool(
+                                "Video.FullScreen") ??
                             false,
-                    onChanged:
-                        (SharedPreferencesHelper.getBool("Video.AutoPlay") ??
+                        onChanged: (SharedPreferencesHelper.getBool(
+                                    "Video.AutoPlay") ??
                                 false)
                             ? (value) async {
                                 await SharedPreferencesHelper.setBool(
@@ -129,28 +134,28 @@ class _SettingScreenState extends State<SettingScreen>
                                 setState(() {});
                               }
                             : null),
-              ),
-              ListTile(
-                title: Text("Playback Speed"),
-                trailing: DropdownButton(
-                  value: SharedPreferencesHelper.getDouble(
-                          "Video.PlaybackSpeed") ??
-                      1,
-                  items: const [
-                    DropdownMenuItem(value: 0.5, child: Text("0.5")),
-                    DropdownMenuItem(value: 1.0, child: Text("1")),
-                    DropdownMenuItem(value: 1.5, child: Text("1.5")),
-                    DropdownMenuItem(value: 2.0, child: Text("2")),
-                    DropdownMenuItem(value: 4.0, child: Text("4")),
-                  ],
-                  onChanged: (value) async {
-                    await SharedPreferencesHelper.setDouble(
-                        "Video.PlaybackSpeed", value?.toDouble() ?? 1.0);
-                    setState(() {});
-                  },
-                ),
-              ),
-            ])
+                  ),
+                  ListTile(
+                    title: Text("Playback Speed"),
+                    trailing: DropdownButton(
+                      value: SharedPreferencesHelper.getDouble(
+                              "Video.PlaybackSpeed") ??
+                          1,
+                      items: const [
+                        DropdownMenuItem(value: 0.5, child: Text("0.5")),
+                        DropdownMenuItem(value: 1.0, child: Text("1")),
+                        DropdownMenuItem(value: 1.5, child: Text("1.5")),
+                        DropdownMenuItem(value: 2.0, child: Text("2")),
+                        DropdownMenuItem(value: 4.0, child: Text("4")),
+                      ],
+                      onChanged: (value) async {
+                        await SharedPreferencesHelper.setDouble(
+                            "Video.PlaybackSpeed", value?.toDouble() ?? 1.0);
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                ])
           ])),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 
-mixin Rotate {
+mixin ScreenRotate {
   void setPortraitMode() {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
