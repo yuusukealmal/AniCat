@@ -24,7 +24,6 @@ dependencies:
       url: https://github.com/Shahidbangash/video_thumbnail.git
       ref: master
   crypto: ^3.0.6
-  image: ^4.5.2
   permission_handler: ^11.3.1
   filesystem_picker: ^4.1.0
   shared_preferences: ^2.4.0
