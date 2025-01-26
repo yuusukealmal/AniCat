@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
+import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
 import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
@@ -16,7 +17,8 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with PathHandle, ScreenRotate {
+class _MyHomePageState extends State<MyHomePage>
+    with PathHandle, ImgCache, ScreenRotate {
   List<String> folders = [];
 
   @override
@@ -230,6 +232,18 @@ class _MyHomePageState extends State<MyHomePage> with PathHandle, ScreenRotate {
                                 if (_progress >= 1.0) {
                                   debugPrint("Download Completed");
                                   await _loadFolders();
+
+                                  var animeFolder =
+                                      await PathHandle.getDownloadPath();
+                                  var path =
+                                      "${animeFolder.path}/$folder/${anime.title}.mp4";
+                                  var cacheImgFolder =
+                                      await ImgCache.getImgCacheFolder();
+                                  var imgCachepath =
+                                      "${cacheImgFolder.path}/${getHash(anime.title!)}.png";
+                                  if (!File(imgCachepath).existsSync()) {
+                                    await getThumbnail(File(path));
+                                  }
 
                                   overlayEntry?.remove();
                                   _isOverlayVisible = false;
