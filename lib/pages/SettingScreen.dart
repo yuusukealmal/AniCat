@@ -58,7 +58,7 @@ class _SettingScreenState extends State<SettingScreen>
                                 child: Icon(Icons.folder)),
                           ),
                           onTap: () async {
-                            var changeDownloadPath =
+                            String? changeDownloadPath =
                                 await checkPermission(context);
                             if (changeDownloadPath != null) {
                               await SharedPreferencesHelper.setString(

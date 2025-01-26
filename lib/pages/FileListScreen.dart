@@ -46,17 +46,17 @@ class _FileListScreenState extends State<FileListScreen>
   }
 
   Future<void> _cacheImage(List<FileSystemEntity> files) async {
-    for (var file in files) {
+    for (FileSystemEntity file in files) {
       String hash = sha256
           .convert(
               utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
           .toString()
           .substring(0, 16);
-      var cacheImgFolder = await ImgCache.getImgCacheFolder();
-      var path = "${cacheImgFolder.path}/$hash.png";
+      Directory cacheImgFolder = await ImgCache.getImgCacheFolder();
+      String path = "${cacheImgFolder.path}/$hash.png";
       if (!await File(path).exists()) {
         debugPrint("Downloading ${file.path}");
-        var thumbnailPath = await getThumbnail(file as File);
+        String thumbnailPath = await getThumbnail(file as File);
         setState(() {
           _fileCacheMap.add(thumbnailPath);
         });

@@ -21,25 +21,25 @@ class Anime {
   Anime({required this.folder, required this.url});
 
   Future<void> _getData() async {
-    var u = Uri.parse(Uri.decodeFull(url));
-    var response = await http.get(u, headers: getHeader());
+    Uri u = Uri.parse(Uri.decodeFull(url));
+    http.Response response = await http.get(u, headers: getHeader());
 
     BeautifulSoup soup = BeautifulSoup(response.body);
     data = soup.find('video', class_: 'video-js')!.getAttrValue('data-apireq');
     title = soup.find('h2', class_: 'entry-title')!.text;
 
-    var api = Uri.parse("https://v.anime1.me/api");
+    Uri api = Uri.parse("https://v.anime1.me/api");
 
     xsend += data!;
     response = await http.post(api, headers: getHeader(), body: xsend);
 
-    var json = jsonDecode(response.body);
+    dynamic json = jsonDecode(response.body);
     realUrl += json['s'][0]['src'];
 
-    var set = response.headers['set-cookie']!;
-    var e = RegExp(r"e=(.*?);").firstMatch(set)!.group(1);
-    var p = RegExp(r"p=(.*?);").firstMatch(set)!.group(1);
-    var h = RegExp(r"HttpOnly,h=(.*?);").firstMatch(set)!.group(1);
+    String set = response.headers['set-cookie']!;
+    String? e = RegExp(r"e=(.*?);").firstMatch(set)!.group(1);
+    String? p = RegExp(r"p=(.*?);").firstMatch(set)!.group(1);
+    String? h = RegExp(r"HttpOnly,h=(.*?);").firstMatch(set)!.group(1);
 
     headers["cookie"] = "e=$e;p=$p;h=$h;";
   }
@@ -60,7 +60,7 @@ class MP4 extends Anime with PathHandle {
 
   Future<Directory> getPath() async {
     final root = await PathHandle.getDownloadPath();
-    var f = Directory('${root.path}/$folder');
+    Directory f = Directory('${root.path}/$folder');
     if (!await f.exists()) {
       await f.create(recursive: true);
     }
@@ -69,11 +69,11 @@ class MP4 extends Anime with PathHandle {
 
   Future<void> download() async {
     try {
-      var url = Uri.parse(realUrl);
-      var request = http.Request('GET', url);
+      Uri url = Uri.parse(realUrl);
+      http.Request request = http.Request('GET', url);
       request.headers.addAll(headers);
 
-      var root = await getPath();
+      Directory root = await getPath();
       final file = File('${root.path}/$title.mp4');
       http.StreamedResponse response = await request.send();
 

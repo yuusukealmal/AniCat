@@ -13,7 +13,7 @@ mixin PathHandle {
 
   Future<List<FileSystemEntity>> loadFiles(String folderPath) async {
     final directory = Directory(folderPath);
-    var folders =
+    List<FileSystemEntity> folders =
         await directory.list().where((entity) => entity is File).toList();
     return folders;
   }

@@ -8,7 +8,7 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 mixin ImgCache {
   static Future<Directory> getImgCacheFolder() async {
     final Directory cacheDir = await getApplicationCacheDirectory();
-    var cachePath = Directory("${cacheDir.path}/img");
+    Directory cachePath = Directory("${cacheDir.path}/img");
     if (!await cachePath.exists()) {
       await cachePath.create(recursive: true);
     }
@@ -34,8 +34,8 @@ mixin ImgCache {
       );
 
       String hash = getHash(file.path);
-      var cacheImgFolder = await getImgCacheFolder();
-      var path = "${cacheImgFolder.path}/$hash.png";
+      Directory cacheImgFolder = await getImgCacheFolder();
+      String path = "${cacheImgFolder.path}/$hash.png";
       debugPrint("Saving $path");
       File(path).writeAsBytes(thumbnail!);
       return path;

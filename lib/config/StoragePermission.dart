@@ -6,7 +6,7 @@ import 'package:filesystem_picker/filesystem_picker.dart';
 
 mixin StoragePermission {
   Future<String> _checkManageStoragePermission() async {
-    var status = await Permission.manageExternalStorage.status;
+    PermissionStatus status = await Permission.manageExternalStorage.status;
     if (status.isRestricted) {
       return "isRestricted";
     }

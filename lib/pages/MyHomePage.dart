@@ -157,9 +157,9 @@ class _MyHomePageState extends State<MyHomePage>
                               }
                             }
                             urls = urls.reversed.toList();
-                            var folder = urls.removeAt(0);
-                            for (var url in urls) {
-                              var anime = MP4(folder: folder, url: url);
+                            String folder = urls.removeAt(0);
+                            for (String url in urls) {
+                              MP4 anime = MP4(folder: folder, url: url);
                               await anime.init();
                               debugPrint("Get Started for ${anime.title}");
 
@@ -233,13 +233,13 @@ class _MyHomePageState extends State<MyHomePage>
                                   debugPrint("Download Completed");
                                   await _loadFolders();
 
-                                  var animeFolder =
+                                  Directory animeFolder =
                                       await PathHandle.getDownloadPath();
-                                  var path =
+                                  String path =
                                       "${animeFolder.path}/$folder/${anime.title}.mp4";
-                                  var cacheImgFolder =
+                                  Directory cacheImgFolder =
                                       await ImgCache.getImgCacheFolder();
-                                  var imgCachepath =
+                                  String imgCachepath =
                                       "${cacheImgFolder.path}/${getHash(anime.title!)}.png";
                                   if (!File(imgCachepath).existsSync()) {
                                     await getThumbnail(File(path));
@@ -443,7 +443,7 @@ class _MyHomePageState extends State<MyHomePage>
                                             const SizedBox(width: 8),
                                             TextButton(
                                               onPressed: () {
-                                                for (var file in files) {
+                                                for (FileSystemEntity file in files) {
                                                   (file as File).deleteSync();
                                                 }
                                                 Navigator.of(context).pop();
