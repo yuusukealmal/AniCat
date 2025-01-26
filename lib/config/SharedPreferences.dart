@@ -63,9 +63,12 @@ class SharedPreferencesHelper with ChangeNotifier {
   }
 
   static Future<void> reset() async {
-    _prefs?.clear();
+    await _prefs?.clear();
     _prefs?.setInt("Home.Color", Color.fromARGB(255, 183, 58, 156).value);
     _prefs?.setString(
         "Anime.DownloadPath", (await getExternalStorageDirectory())!.path);
+    _prefs?.setBool("Video.AutoPlay", false);
+    _prefs?.setBool("Video.FullScreen", false);
+    _prefs?.setDouble("Video.PlaybackSpeed", 1.0);
   }
 }

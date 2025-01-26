@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_video_view/flutter_video_view.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
+import 'package:anicat/config/SharedPreferences.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final String filePath;
@@ -12,6 +13,13 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> with Rotate {
+  VideoPlayerController? _videoPlayerController;
+  bool atuoPlay = SharedPreferencesHelper.getBool("Video.AutoPlay") ?? false;
+  bool fullScreen =
+      SharedPreferencesHelper.getBool("Video.FullScreen") ?? false;
+  double playbackSpeed =
+      SharedPreferencesHelper.getDouble("Video.PlaybackSpeed") ?? 1.0;
+
   @override
   void initState() {
     setLandscapeMode();
@@ -20,19 +28,24 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> with Rotate {
 
   @override
   void dispose() {
+    _videoPlayerController?.dispose();
     setPortraitMode();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final VideoPlayerController videoPlayerController =
-        VideoPlayerController.file(File(widget.filePath));
+    _videoPlayerController = VideoPlayerController.file(File(widget.filePath));
+    _videoPlayerController!.setPlaybackSpeed(playbackSpeed);
 
     return VideoView(
       controller: VideoController(
-          videoPlayerController: videoPlayerController,
-          videoConfig: VideoConfig()),
+          videoPlayerController: _videoPlayerController!,
+          videoConfig: VideoConfig(
+              title: widget.filePath.split('/').last,
+              showLock: true,
+              autoPlay: atuoPlay,
+              fullScreenByDefault: fullScreen)),
     );
   }
 }

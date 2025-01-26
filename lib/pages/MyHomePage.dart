@@ -43,160 +43,228 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
       context: context,
       builder: (BuildContext context) {
         final TextEditingController textController = TextEditingController();
-        return AlertDialog(
-          title: const Text('Enter Anime1 URL'),
-          content: TextField(
-            controller: textController,
-            decoration: const InputDecoration(
-              hintText: 'Enter URL here',
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Enter Anime1 URL',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: textController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter URL here',
+                      hintStyle: TextStyle(
+                          color: Colors.white54),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
+                    style: const TextStyle(
+                        color: Colors.white), // White text color
+                    maxLines: 1,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: () {
+                          final inputUrl = textController.text;
+                          Navigator.of(context).pop();
+                          parse(inputUrl).then((urls) async {
+                            if (urls.isEmpty) {
+                              if (mounted) {
+                                showDialog(
+                                  context: super.context,
+                                  builder: (BuildContext context) {
+                                    return Dialog(
+                                      backgroundColor: Colors.transparent,
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.black.withOpacity(0.8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Text(
+                                                'No Anime1 URL Found',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              const Text(
+                                                'No valid URL matches were found. Please try again with a different URL.',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Align(
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                child: TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.of(context)
+                                                          .pop(),
+                                                  child: const Text(
+                                                    'OK',
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              }
+                            }
+                            urls = urls.reversed.toList();
+                            var folder = urls.removeAt(0);
+                            for (var url in urls) {
+                              var anime = MP4(folder: folder, url: url);
+                              await anime.init();
+                              debugPrint("Get Started for ${anime.title}");
+
+                              double _progress = 0.0;
+                              int _current = 0;
+                              bool _isOverlayVisible = false;
+
+                              OverlayEntry? overlayEntry;
+
+                              void updateOverlay() {
+                                overlayEntry?.markNeedsBuild();
+                              }
+
+                              if (!_isOverlayVisible) {
+                                _isOverlayVisible = true;
+
+                                overlayEntry = OverlayEntry(
+                                  builder: (context) {
+                                    return Positioned(
+                                      bottom: 50,
+                                      left: 20,
+                                      right: 20,
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.black.withOpacity(0.8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Downloading ${anime.title}',
+                                                style: const TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              LinearProgressIndicator(
+                                                  value: _progress),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                '${convertMB(_current)}/${convertMB(anime.size)}  '
+                                                '${(_progress * 100).toStringAsFixed(2)}% Completed',
+                                                style: const TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+
+                                Overlay.of(super.context).insert(overlayEntry);
+                              }
+
+                              anime.progressStream.listen((progress) {
+                                _progress = progress;
+                                _current = anime.current;
+
+                                updateOverlay();
+
+                                if (_progress >= 1.0) {
+                                  debugPrint("Download Completed");
+
+                                  overlayEntry?.remove();
+                                  _isOverlayVisible = false;
+
+                                  ScaffoldMessenger.of(super.context)
+                                      .showSnackBar(const SnackBar(
+                                    content: Text("Download Completed"),
+                                    duration: Duration(seconds: 3),
+                                  ));
+                                }
+                              });
+
+                              await anime.download();
+
+                              if (_isOverlayVisible) {
+                                overlayEntry.remove();
+                                _isOverlayVisible = false;
+                              }
+                            }
+                            debugPrint("Download Completed");
+                          }).catchError((error) {
+                            debugPrint(error.toString());
+                          });
+                        },
+                        child: const Text(
+                          'OK',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            maxLines: 1,
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                final inputUrl = textController.text;
-                Navigator.of(context).pop();
-                parse(inputUrl).then((urls) async {
-                  if (urls.isEmpty) {
-                    if (mounted) {
-                      showDialog(
-                        context: super.context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('No Anime1 URL Found'),
-                            content: const Text(
-                                'No valid URL matches were found. Please try again with a different URL.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }
-                  }
-                  urls = urls.reversed.toList();
-                  var folder = urls.removeAt(0);
-                  for (var url in urls) {
-                    var anime = MP4(folder: folder, url: url);
-                    await anime.init();
-                    debugPrint("Get Started for ${anime.title}");
-
-                    double _progress = 0.0;
-                    int _current = 0;
-                    bool _isOverlayVisible = false;
-
-                    OverlayEntry? overlayEntry;
-
-                    void updateOverlay() {
-                      overlayEntry?.markNeedsBuild();
-                    }
-
-                    if (!_isOverlayVisible) {
-                      _isOverlayVisible = true;
-
-                      overlayEntry = OverlayEntry(
-                        builder: (context) {
-                          return Positioned(
-                            bottom: 50,
-                            left: 20,
-                            right: 20,
-                            child: Material(
-                              color: Colors.transparent,
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.8),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Downloading ${anime.title}',
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    LinearProgressIndicator(value: _progress),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      '${convertMB(_current)}/${convertMB(anime.size)}  '
-                                      '${(_progress * 100).toStringAsFixed(2)}% Completed',
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                    // Align(
-                                    //   alignment: Alignment.centerRight,
-                                    //   child: TextButton(
-                                    //     onPressed: () {
-                                    //       // 停止下載的邏輯
-                                    //       debugPrint("Download Cancelled");
-                                    //       overlayEntry?.remove();
-                                    //       _isOverlayVisible = false;
-                                    //     },
-                                    //     child: const Text(
-                                    //       'Cancel',
-                                    //       style: TextStyle(color: Colors.red),
-                                    //     ),
-                                    //   ),
-                                    // ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-
-                      Overlay.of(super.context).insert(overlayEntry);
-                    }
-
-                    anime.progressStream.listen((progress) {
-                      _progress = progress;
-                      _current = anime.current;
-
-                      updateOverlay();
-
-                      if (_progress >= 1.0) {
-                        debugPrint("Download Completed");
-
-                        overlayEntry?.remove();
-                        _isOverlayVisible = false;
-
-                        ScaffoldMessenger.of(super.context)
-                            .showSnackBar(const SnackBar(
-                          content: Text("Download Completed"),
-                          duration: Duration(seconds: 3),
-                        ));
-                      }
-                    });
-
-                    await anime.download();
-
-                    if (_isOverlayVisible) {
-                      overlayEntry.remove();
-                      _isOverlayVisible = false;
-                    }
-                  }
-                  debugPrint("Download Completed");
-                }).catchError((error) {
-                  debugPrint(error.toString());
-                });
-              },
-              child: const Text('OK'),
-            ),
-          ],
         );
       },
     );
@@ -232,12 +300,158 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
                 if (files == null || files.isEmpty) {
                   return const SizedBox.shrink();
                 }
-                return ListTile(
-                  title: Text(folderName),
-                  subtitle: Text("${files.length} Files"),
-                  leading: const Icon(Icons.folder),
-                  onTap: () => openFolder(context, folderPath),
-                );
+                return GestureDetector(
+                    child: ListTile(
+                      title: Text(folderName),
+                      subtitle: Text("${files.length} Files"),
+                      leading: const Icon(Icons.folder),
+                      onTap: () => openFolder(context, folderPath),
+                    ),
+                    onLongPressStart: (details) {
+                      final Offset position = details.globalPosition;
+                      showMenu(
+                        context: context,
+                        position: RelativeRect.fromLTRB(
+                            position.dx, position.dy, position.dx, 0),
+                        items: [
+                          PopupMenuItem(
+                              value: 'properties',
+                              child: ListTile(
+                                title: Text('屬性'),
+                                leading: const Icon(Icons.info),
+                              )),
+                          PopupMenuItem(
+                              value: 'delete',
+                              child: ListTile(
+                                title: Text('刪除資料夾'),
+                                leading: const Icon(Icons.delete),
+                              )),
+                        ],
+                      ).then((value) {
+                        if (value == 'properties') {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                backgroundColor: Colors.transparent,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.8),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          folderName,
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          "影片數量: ${files.length}\n總大小: ${convertMB(files.fold(0, (total, file) => total + (file as File).lengthSync()))}",
+                                          style: const TextStyle(
+                                              color: Colors.white),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: TextButton(
+                                            onPressed: () =>
+                                                Navigator.of(context).pop(),
+                                            child: const Text(
+                                              "關閉",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        } else if (value == 'delete') {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                backgroundColor: Colors.transparent,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.8),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "刪除資料夾",
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          "確定要刪除資料夾嗎?",
+                                          style: const TextStyle(
+                                              color: Colors.white),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.of(context).pop(),
+                                              child: const Text(
+                                                "取消",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            TextButton(
+                                              onPressed: () {
+                                                for (var file in files) {
+                                                  (file as File).deleteSync();
+                                                }
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text(
+                                                "刪除",
+                                                style: TextStyle(
+                                                    color: Colors.red),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        }
+                      });
+                    });
               },
             );
           },

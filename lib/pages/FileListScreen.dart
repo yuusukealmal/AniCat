@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:anicat/functions/behavior/PathLoad.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
 import 'package:anicat/functions/Calc.dart';
+import 'package:anicat/functions/GetLeading.dart';
 import 'package:anicat/pages/VideoPlayerScreen.dart';
 
 class FileListScreen extends StatefulWidget {
@@ -49,7 +50,7 @@ class _FileListScreenState extends State<FileListScreen> with Load, Rotate {
               utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
           .toString()
           .substring(0, 16);
-      var cacheImgFolder = await getCacheImgFolder();
+      var cacheImgFolder = await Load.getCacheImgFolder();
       var path = "${cacheImgFolder.path}/$hash.png";
       if (!await File(path).exists()) {
         debugPrint("Downloading ${file.path}");
@@ -75,29 +76,7 @@ class _FileListScreenState extends State<FileListScreen> with Load, Rotate {
         return ListTile(
           title: Text(fileName),
           subtitle: Text(getFileSize(file.lengthSync())),
-          leading: {
-                'mp4': _fileCacheMap.length > index &&
-                        _fileCacheMap[index].isNotEmpty
-                    ? Image(image: FileImage(File(_fileCacheMap[index])))
-                    : const Icon(Icons.video_file),
-                'mkv': const Icon(Icons.video_file),
-                'webm': const Icon(Icons.video_file),
-                'jpg': const Icon(Icons.image),
-                'png': const Icon(Icons.image),
-                'jpeg': const Icon(Icons.image),
-                'gif': const Icon(Icons.gif),
-                'mp3': const Icon(Icons.music_note),
-                'wav': const Icon(Icons.music_note),
-                'aac': const Icon(Icons.music_note),
-                'ogg': const Icon(Icons.music_note),
-                'm4a': const Icon(Icons.music_note),
-                'flac': const Icon(Icons.music_note),
-                'mp4v': const Icon(Icons.video_file),
-                'mov': const Icon(Icons.video_file),
-                'wmv': const Icon(Icons.video_file),
-                'avi': const Icon(Icons.video_file),
-              }[fileName.split(".").last] ??
-              Icon(Icons.insert_drive_file),
+          leading: getFileLeading(fileName, index, _fileCacheMap),
           onTap: () {
             debugPrint('Tapped file: $fileName');
             Navigator.push(

@@ -34,7 +34,7 @@ mixin Load {
     );
   }
 
-  Future<Directory> getCacheImgFolder() async {
+  static Future<Directory> getCacheImgFolder() async {
     final Directory cacheDir = await getApplicationCacheDirectory();
     var cachePath = Directory("${cacheDir.path}/img");
     if (!await cachePath.exists()) {
