@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 
 mixin StoragePermission {
@@ -82,11 +83,119 @@ mixin StoragePermission {
     );
   }
 
+  String _getExternalStorageType(String path) {
+    final isSDCard = RegExp(r'/storage/([0-9A-Fa-f]{4}-[0-9A-Fa-f]{4})');
+    if (path.contains('/storage/emulated/')) {
+      return 'Internal Storage';
+    } else if (isSDCard.hasMatch(path)) {
+      return 'SD Card (${isSDCard.firstMatch(path)![1]})';
+    } else {
+      return 'Unknown Storage $path';
+    }
+  }
+
+  Future<String?> _getExternalStorage(BuildContext context) async {
+    final directories = await getExternalStorageDirectories();
+
+    if (directories == null || directories.isEmpty) {
+      return null;
+    }
+
+    return await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Select Folder",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  directories.isNotEmpty
+                      ? Flexible(
+                          child: ListView.builder(
+                            itemCount: directories.length,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                leading: const Icon(Icons.folder,
+                                    color: Colors.white),
+                                title: Text(
+                                  _getExternalStorageType(
+                                      directories[index].path),
+                                  style: const TextStyle(color: Colors.white),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).pop(
+                                      _getExternalStorageType(
+                                          directories[index].path));
+                                },
+                              );
+                            },
+                          ),
+                        )
+                      : const Center(
+                          child: Text(
+                            "No directories found",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text(
+                          "Cancel",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<String?> _chooseSavingFolder(BuildContext context) async {
+    final result = await _getExternalStorage(context);
+    String? target;
+
+    if (result == "Internal Storage") {
+      target = "/storage/emulated/0";
+    } else if (result!.startsWith("SD Card")) {
+      String id = result.split(" ")[2].replaceAll(RegExp(r'\(|\)'), "");
+      target = "/storage/$id";
+    } else {
+      target = result.split(" ")[2];
+    }
+
     return await FilesystemPicker.open(
       title: 'Save to folder',
       context: context,
-      rootDirectory: Directory('/storage/emulated/0/'),
+      rootDirectory: Directory(target),
       fsType: FilesystemType.folder,
       pickText: 'Save file to this folder',
     );
