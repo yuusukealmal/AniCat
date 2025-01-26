@@ -66,8 +66,7 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
                     controller: textController,
                     decoration: const InputDecoration(
                       hintText: 'Enter URL here',
-                      hintStyle: TextStyle(
-                          color: Colors.white54),
+                      hintStyle: TextStyle(color: Colors.white54),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.white),
                       ),
@@ -233,6 +232,7 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
 
                                   overlayEntry?.remove();
                                   _isOverlayVisible = false;
+                                  setState(() {});
 
                                   ScaffoldMessenger.of(super.context)
                                       .showSnackBar(const SnackBar(
