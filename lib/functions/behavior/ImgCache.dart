@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart';
-import 'package:image/image.dart' as img;
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 mixin ImgCache {
@@ -17,6 +16,14 @@ mixin ImgCache {
     return cachePath;
   }
 
+  String getHash(String filePath) {
+    String hash = sha256
+        .convert(utf8.encode(filePath.split("/").last.replaceAll(".mp4", "")))
+        .toString()
+        .substring(0, 16);
+    return hash;
+  }
+
   Future<String> getThumbnail(File file) async {
     try {
       Uint8List? thumbnail = await VideoThumbnail.thumbnailData(
@@ -25,30 +32,16 @@ mixin ImgCache {
         timeMs: 720000,
         quality: 100,
       );
-      String result = await compute(_processThumbnail, [file.path, thumbnail]);
-      return result;
+
+      String hash = getHash(file.path);
+      var cacheImgFolder = await getImgCacheFolder();
+      var path = "${cacheImgFolder.path}/$hash.png";
+      debugPrint("Saving $path");
+      File(path).writeAsBytes(thumbnail!);
+      return path;
     } catch (e) {
       debugPrint("Error ${e.toString()}");
       return "";
     }
-  }
-
-  Future<String> _processThumbnail(List<dynamic> args) async {
-    String filePath = args[0];
-    Uint8List thumbnail = args[1];
-
-    img.Image image = img.decodeImage(thumbnail)!;
-
-    String hash = sha256
-        .convert(utf8.encode(filePath.split("/").last.replaceAll(".mp4", "")))
-        .toString()
-        .substring(0, 16);
-
-    var cacheImgFolder = await getImgCacheFolder();
-    var path = "${cacheImgFolder.path}/$hash.png";
-
-    File(path).writeAsBytesSync(img.encodePng(image));
-    debugPrint("Saving $path");
-    return path;
   }
 }
