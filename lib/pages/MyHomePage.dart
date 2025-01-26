@@ -221,7 +221,7 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
                                 Overlay.of(super.context).insert(overlayEntry);
                               }
 
-                              anime.progressStream.listen((progress) {
+                              anime.progressStream.listen((progress) async {
                                 _progress = progress;
                                 _current = anime.current;
 
@@ -229,10 +229,10 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
 
                                 if (_progress >= 1.0) {
                                   debugPrint("Download Completed");
+                                  await _loadFolders();
 
                                   overlayEntry?.remove();
                                   _isOverlayVisible = false;
-                                  setState(() {});
 
                                   ScaffoldMessenger.of(super.context)
                                       .showSnackBar(const SnackBar(
@@ -433,6 +433,7 @@ class _MyHomePageState extends State<MyHomePage> with Load, Rotate {
                                                   (file as File).deleteSync();
                                                 }
                                                 Navigator.of(context).pop();
+                                                setState(() {});
                                               },
                                               child: const Text(
                                                 "刪除",
