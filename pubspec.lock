@@ -160,7 +160,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "18aedfa007c47822c43a2d1baedbb496885f1083"
+      resolved-ref: b5ba59902655587e339fbf8b94e1abcca0d3c4ec
       url: "https://github.com/yuusukealmal/flutter_video_view.git"
     source: git
     version: "2.1.1"
