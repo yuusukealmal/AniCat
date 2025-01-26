@@ -107,21 +107,29 @@ class _SettingScreenState extends State<SettingScreen>
                     onChanged: (value) async {
                       await SharedPreferencesHelper.setBool(
                           "Video.AutoPlay", value);
+                      if (!value) {
+                        await SharedPreferencesHelper.setBool(
+                            "Video.FullScreen", false);
+                      }
                       setState(() {});
                     },
                   )),
               ListTile(
-                  title: Text("Fullscreen by Default"),
-                  trailing: Switch(
+                title: Text("Fullscreen by Default"),
+                trailing: Switch(
                     value:
                         SharedPreferencesHelper.getBool("Video.FullScreen") ??
                             false,
-                    onChanged: (value) async {
-                      await SharedPreferencesHelper.setBool(
-                          "Video.FullScreen", value);
-                      setState(() {});
-                    },
-                  )),
+                    onChanged:
+                        (SharedPreferencesHelper.getBool("Video.AutoPlay") ??
+                                false)
+                            ? (value) async {
+                                await SharedPreferencesHelper.setBool(
+                                    "Video.FullScreen", value);
+                                setState(() {});
+                              }
+                            : null),
+              ),
               ListTile(
                 title: Text("Playback Speed"),
                 trailing: DropdownButton(
