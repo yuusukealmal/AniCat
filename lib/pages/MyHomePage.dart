@@ -28,14 +28,7 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   Future<void> _loadFolders() async {
-    final directory = await PathHandle.getDownloadPath();
-
-    final folderList = await directory
-        .list()
-        .where((entity) => entity is Directory)
-        .map((entity) => entity.path)
-        .toList();
-    folderList.sort((a, b) => a.compareTo(b));
+    List<String> folderList = await loadFolders();
     setState(() {
       folders = folderList;
     });
