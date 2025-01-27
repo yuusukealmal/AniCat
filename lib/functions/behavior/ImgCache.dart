@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:anicat/downloader/AnimeDownloader.dart';
+import 'package:anicat/functions/behavior/PathHandle.dart';
 
 mixin ImgCache {
   static Future<Directory> getImgCacheFolder() async {
@@ -42,6 +44,16 @@ mixin ImgCache {
     } catch (e) {
       debugPrint("Error ${e.toString()}");
       return "";
+    }
+  }
+
+  Future<void> checkCache(String folder, MP4 anime) async {
+    Directory animeFolder = await PathHandle.getDownloadPath();
+    String path = "${animeFolder.path}/$folder/${anime.title}.mp4";
+    Directory cacheImgFolder = await ImgCache.getImgCacheFolder();
+    String imgCachepath = "${cacheImgFolder.path}/${getHash(anime.title!)}.png";
+    if (!File(imgCachepath).existsSync()) {
+      await getThumbnail(File(path));
     }
   }
 }

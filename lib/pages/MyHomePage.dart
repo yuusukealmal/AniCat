@@ -1,11 +1,13 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:anicat/functions/behavior/PathHandle.dart';
-import 'package:anicat/functions/behavior/ImgCache.dart';
-import 'package:anicat/functions/behavior/ScreenRotate.dart';
 import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
 import 'package:anicat/functions/Calc.dart';
+import 'package:anicat/functions/behavior/PathHandle.dart';
+import 'package:anicat/functions/behavior/ImgCache.dart';
+import 'package:anicat/functions/behavior/ScreenRotate.dart';
+import 'package:anicat/widget/MyHomePage/onPropertiesPress.dart';
+import 'package:anicat/widget/MyHomePage/onDeletePress.dart';
+import 'package:anicat/widget/MyHomePage/onAddButtonPressed/AnimeInvalid.dart';
 import 'package:anicat/pages/SettingScreen.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -108,59 +110,7 @@ class _MyHomePageState extends State<MyHomePage>
                           parse(inputUrl).then((urls) async {
                             if (urls.isEmpty) {
                               if (mounted) {
-                                showDialog(
-                                  context: super.context,
-                                  builder: (BuildContext context) {
-                                    return Dialog(
-                                      backgroundColor: Colors.transparent,
-                                      child: Material(
-                                        color: Colors.transparent,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                Colors.black.withOpacity(0.8),
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const Text(
-                                                'No Anime1 URL Found',
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              const Text(
-                                                'No valid URL matches were found. Please try again with a different URL.',
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Align(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                child: TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.of(context)
-                                                          .pop(),
-                                                  child: const Text(
-                                                    'OK',
-                                                    style: TextStyle(
-                                                        color: Colors.white),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
+                                animeInvalidDialog(context);
                               }
                             }
                             urls = urls.reversed.toList();
@@ -238,20 +188,9 @@ class _MyHomePageState extends State<MyHomePage>
 
                                 if (_progress >= 1.0) {
                                   debugPrint("Download Completed");
+
                                   await _loadFolders();
-
-                                  Directory animeFolder =
-                                      await PathHandle.getDownloadPath();
-                                  String path =
-                                      "${animeFolder.path}/$folder/${anime.title}.mp4";
-                                  Directory cacheImgFolder =
-                                      await ImgCache.getImgCacheFolder();
-                                  String imgCachepath =
-                                      "${cacheImgFolder.path}/${getHash(anime.title!)}.png";
-                                  if (!File(imgCachepath).existsSync()) {
-                                    await getThumbnail(File(path));
-                                  }
-
+                                  checkCache(folder, anime);
                                   ScaffoldMessenger.of(super.context)
                                       .showSnackBar(SnackBar(
                                     content: Text(
@@ -351,128 +290,10 @@ class _MyHomePageState extends State<MyHomePage>
                         ],
                       ).then((value) {
                         if (value == 'properties') {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return Dialog(
-                                backgroundColor: Colors.transparent,
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.8),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          folderName,
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 18),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          "影片數量: ${files.length}\n總大小: ${convertMB(files.fold(0, (total, file) => total + (file as File).lengthSync()))}\n創建日期: ${(files.first as File).lastModifiedSync().toLocal()}",
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Align(
-                                          alignment: Alignment.centerRight,
-                                          child: TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(),
-                                            child: const Text(
-                                              "關閉",
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
+                          onFolderPropertiesPress(context, folderName, files);
                         } else if (value == 'delete') {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return Dialog(
-                                backgroundColor: Colors.transparent,
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.8),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "刪除資料夾",
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          "確定要刪除資料夾嗎?",
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.of(context).pop(),
-                                              child: const Text(
-                                                "取消",
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            TextButton(
-                                              onPressed: () {
-                                                for (FileSystemEntity file
-                                                    in files) {
-                                                  (file as File).deleteSync();
-                                                }
-                                                Navigator.of(context).pop();
-                                                setState(() {});
-                                              },
-                                              child: const Text(
-                                                "刪除",
-                                                style: TextStyle(
-                                                    color: Colors.red),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
+                          onFolderDeletePress(context, folderPath, files);
+                          setState(() {});
                         }
                       });
                     });

@@ -6,7 +6,7 @@ import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
 import 'package:anicat/functions/Calc.dart';
-import 'package:anicat/functions/GetLeading.dart';
+import 'package:anicat/widget/FileListScreen/getFileLeading.dart';
 import 'package:anicat/pages/VideoPlayerScreen.dart';
 
 class FileListScreen extends StatefulWidget {
