@@ -239,14 +239,15 @@ class _MyHomePageState extends State<MyHomePage>
                                     await getThumbnail(File(path));
                                   }
 
+                                  ScaffoldMessenger.of(super.context)
+                                      .showSnackBar(SnackBar(
+                                    content: Text(
+                                        "Download Completed ${anime.title}"),
+                                    duration: Duration(seconds: 1),
+                                  ));
+
                                   overlayEntry?.remove();
                                   _isOverlayVisible = false;
-
-                                  ScaffoldMessenger.of(super.context)
-                                      .showSnackBar(const SnackBar(
-                                    content: Text("Download Completed"),
-                                    duration: Duration(seconds: 3),
-                                  ));
                                 }
                               });
 
@@ -363,7 +364,7 @@ class _MyHomePageState extends State<MyHomePage>
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          "影片數量: ${files.length}\n總大小: ${convertMB(files.fold(0, (total, file) => total + (file as File).lengthSync()))}",
+                                          "影片數量: ${files.length}\n總大小: ${convertMB(files.fold(0, (total, file) => total + (file as File).lengthSync()))}\n創建日期: ${(files.first as File).lastModifiedSync().toLocal()}",
                                           style: const TextStyle(
                                               color: Colors.white),
                                         ),
