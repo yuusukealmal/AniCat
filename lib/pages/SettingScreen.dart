@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/config/StoragePermission.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
-import 'package:anicat/functions/behavior/SettingScreenonPress.dart';
+import 'package:anicat/widget/SettingScreen/onChangeColoronPress.dart';
+import 'package:anicat/widget/SettingScreen/onResetSharedPreferences.dart';
+import 'package:anicat/widget/SettingScreen/onClearCache.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -48,35 +50,23 @@ class _SettingScreenState extends State<SettingScreen>
                 FutureBuilder(
                   future: PathHandle.getDownloadPath(),
                   builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return GestureDetector(
-                          child: ListTile(
-                            title: const Text("Change Download Path"),
-                            subtitle: Text(snapshot.data!.path),
-                            trailing: Padding(
-                                padding: EdgeInsets.only(right: 10.0),
-                                child: Icon(Icons.folder)),
-                          ),
-                          onTap: () async {
-                            String? changeDownloadPath =
-                                await checkPermission(context);
-                            if (changeDownloadPath != null) {
-                              await SharedPreferencesHelper.setString(
-                                  "Anime.DownloadPath", changeDownloadPath);
-                              setState(() {});
-                            }
-                          });
-                    } else {
-                      return GestureDetector(
+                    return GestureDetector(
                         child: ListTile(
                           title: const Text("Change Download Path"),
-                          subtitle: const Text("Loading..."),
+                          subtitle: Text(snapshot.data!.path),
                           trailing: Padding(
                               padding: EdgeInsets.only(right: 10.0),
                               child: Icon(Icons.folder)),
                         ),
-                      );
-                    }
+                        onTap: () async {
+                          String? changeDownloadPath =
+                              await checkPermission(context);
+                          if (changeDownloadPath != null) {
+                            await SharedPreferencesHelper.setString(
+                                "Anime.DownloadPath", changeDownloadPath);
+                            setState(() {});
+                          }
+                        });
                   },
                 ),
                 GestureDetector(

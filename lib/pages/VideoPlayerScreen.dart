@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_video_view/flutter_video_view.dart';
-import 'package:anicat/functions/behavior/ScreenRotate.dart';
 import 'package:anicat/config/SharedPreferences.dart';
+import 'package:anicat/functions/behavior/ScreenRotate.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final String filePath;
