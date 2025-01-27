@@ -17,8 +17,10 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
 class _MyHomePageState extends State<MyHomePage>
-    with PathHandle, ImgCache, ScreenRotate {
+    with PathHandle, ImgCache, ScreenRotate, RouteAware {
   List<String> folders = [];
 
   @override
@@ -27,11 +29,22 @@ class _MyHomePageState extends State<MyHomePage>
     _loadFolders();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
+  }
+
   Future<void> _loadFolders() async {
     List<String> folderList = await loadFolders();
     setState(() {
       folders = folderList;
     });
+  }
+
+  @override
+  void didPopNext() {
+    _loadFolders();
   }
 
   void _onAddButtonPressed() {
