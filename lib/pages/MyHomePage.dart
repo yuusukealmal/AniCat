@@ -35,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage>
         .where((entity) => entity is Directory)
         .map((entity) => entity.path)
         .toList();
+    folderList.sort((a, b) => a.compareTo(b));
     setState(() {
       folders = folderList;
     });
@@ -443,7 +444,8 @@ class _MyHomePageState extends State<MyHomePage>
                                             const SizedBox(width: 8),
                                             TextButton(
                                               onPressed: () {
-                                                for (FileSystemEntity file in files) {
+                                                for (FileSystemEntity file
+                                                    in files) {
                                                   (file as File).deleteSync();
                                                 }
                                                 Navigator.of(context).pop();
