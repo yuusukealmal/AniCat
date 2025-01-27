@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/config/notifier/HomeColorNotifier.dart';
 import 'package:anicat/pages/MyHomePage.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPreferencesHelper.init();
@@ -42,6 +43,7 @@ class _MyAppState extends State<MyApp> {
               useMaterial3: true,
             ),
             home: const MyHomePage(title: "AniCat"),
+            navigatorObservers: [routeObserver],
           );
         });
   }

@@ -11,6 +11,19 @@ mixin PathHandle {
     return Directory(path);
   }
 
+  Future<List<String>> loadFolders() async {
+    debugPrint("Loading Folders");
+    final directory = await PathHandle.getDownloadPath();
+
+    final folderList = await directory
+        .list()
+        .where((entity) => entity is Directory)
+        .map((entity) => entity.path)
+        .toList();
+    folderList.sort((a, b) => a.compareTo(b));
+    return folderList;
+  }
+
   Future<List<FileSystemEntity>> loadFiles(String folderPath) async {
     final directory = Directory(folderPath);
     List<FileSystemEntity> folders =

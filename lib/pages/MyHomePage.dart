@@ -17,8 +17,10 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
 class _MyHomePageState extends State<MyHomePage>
-    with PathHandle, ImgCache, ScreenRotate {
+    with PathHandle, ImgCache, ScreenRotate, RouteAware {
   List<String> folders = [];
 
   @override
@@ -27,17 +29,22 @@ class _MyHomePageState extends State<MyHomePage>
     _loadFolders();
   }
 
-  Future<void> _loadFolders() async {
-    final directory = await PathHandle.getDownloadPath();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
+  }
 
-    final folderList = await directory
-        .list()
-        .where((entity) => entity is Directory)
-        .map((entity) => entity.path)
-        .toList();
+  Future<void> _loadFolders() async {
+    List<String> folderList = await loadFolders();
     setState(() {
       folders = folderList;
     });
+  }
+
+  @override
+  void didPopNext() {
+    _loadFolders();
   }
 
   void _onAddButtonPressed() {
@@ -245,14 +252,15 @@ class _MyHomePageState extends State<MyHomePage>
                                     await getThumbnail(File(path));
                                   }
 
+                                  ScaffoldMessenger.of(super.context)
+                                      .showSnackBar(SnackBar(
+                                    content: Text(
+                                        "Download Completed ${anime.title}"),
+                                    duration: Duration(seconds: 1),
+                                  ));
+
                                   overlayEntry?.remove();
                                   _isOverlayVisible = false;
-
-                                  ScaffoldMessenger.of(super.context)
-                                      .showSnackBar(const SnackBar(
-                                    content: Text("Download Completed"),
-                                    duration: Duration(seconds: 3),
-                                  ));
                                 }
                               });
 
@@ -369,7 +377,7 @@ class _MyHomePageState extends State<MyHomePage>
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          "影片數量: ${files.length}\n總大小: ${convertMB(files.fold(0, (total, file) => total + (file as File).lengthSync()))}",
+                                          "影片數量: ${files.length}\n總大小: ${convertMB(files.fold(0, (total, file) => total + (file as File).lengthSync()))}\n創建日期: ${(files.first as File).lastModifiedSync().toLocal()}",
                                           style: const TextStyle(
                                               color: Colors.white),
                                         ),
@@ -443,7 +451,8 @@ class _MyHomePageState extends State<MyHomePage>
                                             const SizedBox(width: 8),
                                             TextButton(
                                               onPressed: () {
-                                                for (FileSystemEntity file in files) {
+                                                for (FileSystemEntity file
+                                                    in files) {
                                                   (file as File).deleteSync();
                                                 }
                                                 Navigator.of(context).pop();
