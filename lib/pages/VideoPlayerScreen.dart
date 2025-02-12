@@ -41,12 +41,15 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
 
     return VideoView(
       controller: VideoController(
-          videoPlayerController: _videoPlayerController!,
-          videoConfig: VideoConfig(
-              title: widget.filePath.split('/').last,
-              showLock: true,
-              autoPlay: atuoPlay,
-              fullScreenByDefault: fullScreen)),
+        videoPlayerController: _videoPlayerController!,
+        videoConfig: VideoConfig(
+          title: widget.filePath.split('/').last,
+          showLock: true,
+          autoPlay: atuoPlay,
+          fullScreenByDefault: fullScreen,
+          canCloseOnBack: true,
+        ),
+      ),
     );
   }
 }

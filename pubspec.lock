@@ -184,10 +184,10 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: b5ba59902655587e339fbf8b94e1abcca0d3c4ec
+      resolved-ref: "3798154033d06cc38979f526e207c530d12d08ac"
       url: "https://github.com/yuusukealmal/flutter_video_view.git"
     source: git
-    version: "2.1.1"
+    version: "2.1.2"
   flutter_web_plugins:
     dependency: transitive
     description: flutter

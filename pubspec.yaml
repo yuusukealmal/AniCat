@@ -14,7 +14,7 @@ dependencies:
   beautiful_soup_dart: ^0.3.0
   cupertino_icons: ^1.0.8
   path_provider: ^2.1.5
-  flutter_video_view:
+  flutter_video_view: 
     git: 
       url: https://github.com/yuusukealmal/flutter_video_view.git
       ref: main
