@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:anicat/api/AnimeList.dart';
+import 'package:anicat/config/notifier/ThemeProvider.dart';
 import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
-import 'package:anicat/config/notifier/ThemeProvider.dart';
 import 'package:anicat/functions/Calc.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
+import 'package:anicat/pages/SettingScreen.dart';
 import 'package:anicat/widget/MyHomePage/onPropertiesPress.dart';
 import 'package:anicat/widget/MyHomePage/onDeletePress.dart';
 import 'package:anicat/widget/MyHomePage/onAddButtonPressed/AnimeInvalid.dart';
-import 'package:anicat/pages/SettingScreen.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
