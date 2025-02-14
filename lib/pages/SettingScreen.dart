@@ -50,6 +50,9 @@ class _SettingScreenState extends State<SettingScreen>
                 FutureBuilder(
                   future: PathHandle.getDownloadPath(),
                   builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
                     return GestureDetector(
                         child: ListTile(
                           title: const Text("Change Download Path"),
