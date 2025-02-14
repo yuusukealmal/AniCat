@@ -1,13 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:anicat/config/SharedPreferences.dart';
-import 'package:anicat/config/notifier/HomeColorNotifier.dart';
+import 'package:anicat/config/notifier/HomeColorProvider.dart';
+import 'package:anicat/config/notifier/ThemeProvider.dart';
 import 'package:anicat/pages/MyHomePage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPreferencesHelper.init();
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) {
+          final colorNotifier = ColorNotifier();
+          colorNotifier.init();
+          return colorNotifier;
+        }),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -25,26 +38,27 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) {
-            final colorNotifier = ColorNotifier();
-            colorNotifier.init();
-            return colorNotifier;
-          }),
-        ],
-        builder: (context, child) {
-          final color = Provider.of<ColorNotifier>(context);
-          return MaterialApp(
-            title: "AniCat Downloader",
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                  seedColor: color.color ?? Color.fromARGB(255, 183, 58, 156)),
-              useMaterial3: true,
-            ),
-            home: const MyHomePage(title: "AniCat"),
-            navigatorObservers: [routeObserver],
-          );
-        });
+    final color = Provider.of<ColorNotifier>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return MaterialApp(
+      title: "AniCat Downloader",
+      theme: ThemeData.light().copyWith(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: color.color ?? const Color.fromARGB(255, 183, 58, 156),
+        ),
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData.dark().copyWith(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: color.color ?? const Color.fromARGB(255, 183, 58, 156),
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: themeProvider.themeMode,
+      home: const MyHomePage(title: "AniCat"),
+      navigatorObservers: [routeObserver],
+    );
   }
 }

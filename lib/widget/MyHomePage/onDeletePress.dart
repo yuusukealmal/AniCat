@@ -7,13 +7,10 @@ dynamic onFolderDeletePress(
     context: context,
     builder: (BuildContext context) {
       return Dialog(
-        backgroundColor: Colors.transparent,
         child: Material(
-          color: Colors.transparent,
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.8),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -23,7 +20,6 @@ dynamic onFolderDeletePress(
                 Text(
                   "刪除資料夾",
                   style: const TextStyle(
-                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
@@ -31,7 +27,6 @@ dynamic onFolderDeletePress(
                 const SizedBox(height: 8),
                 Text(
                   "確定要刪除資料夾嗎?",
-                  style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -41,7 +36,6 @@ dynamic onFolderDeletePress(
                       onPressed: () => Navigator.of(context).pop(),
                       child: const Text(
                         "取消",
-                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                     const SizedBox(width: 8),

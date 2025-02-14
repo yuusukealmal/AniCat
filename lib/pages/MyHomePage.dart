@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
+import 'package:anicat/config/notifier/ThemeProvider.dart';
 import 'package:anicat/functions/Calc.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/functions/behavior/ImgCache.dart';
@@ -49,19 +51,21 @@ class _MyHomePageState extends State<MyHomePage>
     _loadFolders();
   }
 
+  void _toggleTheme() async {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    await themeProvider.toggleTheme();
+  }
+
   void _onAddButtonPressed() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         final TextEditingController textController = TextEditingController();
         return Dialog(
-          backgroundColor: Colors.transparent,
           child: Material(
-            color: Colors.transparent,
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -70,23 +74,20 @@ class _MyHomePageState extends State<MyHomePage>
                 children: [
                   const Text(
                     'Enter Anime1 URL',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                    style: TextStyle(fontSize: 18),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: textController,
                     decoration: const InputDecoration(
                       hintText: 'Enter URL here',
-                      hintStyle: TextStyle(color: Colors.white54),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
+                          ),
                       focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
+                          ),
                     ),
                     style: const TextStyle(
-                        color: Colors.white), // White text color
+                        ), // White text color
                     maxLines: 1,
                   ),
                   const SizedBox(height: 16),
@@ -99,7 +100,6 @@ class _MyHomePageState extends State<MyHomePage>
                         },
                         child: const Text(
                           'Cancel',
-                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -140,12 +140,9 @@ class _MyHomePageState extends State<MyHomePage>
                                       left: 20,
                                       right: 20,
                                       child: Material(
-                                        color: Colors.transparent,
                                         child: Container(
                                           padding: const EdgeInsets.all(16),
                                           decoration: BoxDecoration(
-                                            color:
-                                                Colors.black.withOpacity(0.8),
                                             borderRadius:
                                                 BorderRadius.circular(8),
                                           ),
@@ -156,8 +153,6 @@ class _MyHomePageState extends State<MyHomePage>
                                             children: [
                                               Text(
                                                 'Downloading ${anime.title}',
-                                                style: const TextStyle(
-                                                    color: Colors.white),
                                               ),
                                               const SizedBox(height: 8),
                                               LinearProgressIndicator(
@@ -166,8 +161,6 @@ class _MyHomePageState extends State<MyHomePage>
                                               Text(
                                                 '${convertMB(_current)}/${convertMB(anime.size)}  '
                                                 '${(_progress * 100).toStringAsFixed(2)}% Completed',
-                                                style: const TextStyle(
-                                                    color: Colors.white),
                                               ),
                                             ],
                                           ),
@@ -217,7 +210,6 @@ class _MyHomePageState extends State<MyHomePage>
                         },
                         child: const Text(
                           'OK',
-                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                     ],
@@ -237,15 +229,23 @@ class _MyHomePageState extends State<MyHomePage>
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         leading: IconButton(
-            tooltip: "Open Settings",
-            onPressed: () async {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SettingScreen()),
-              );
-            },
-            icon: const Icon(Icons.menu)),
+          tooltip: "Open Settings",
+          onPressed: () async {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingScreen()),
+            );
+          },
+          icon: const Icon(Icons.menu),
+        ),
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.light_mode_outlined),
+            tooltip: 'Toggle Theme',
+            onPressed: _toggleTheme,
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadFolders,

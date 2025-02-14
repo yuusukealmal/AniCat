@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
-import 'package:anicat/config/notifier/HomeColorNotifier.dart';
+import 'package:anicat/config/notifier/HomeColorProvider.dart';
 
 Future<dynamic> onChangeColoronPress(BuildContext context, int? selectedColor) {
   return showDialog(
     context: context,
     builder: (BuildContext context) {
       return Dialog(
-        backgroundColor: Colors.transparent,
         child: Material(
-          color: Colors.transparent,
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -24,7 +21,6 @@ Future<dynamic> onChangeColoronPress(BuildContext context, int? selectedColor) {
                 Text(
                   "Change Theme Color",
                   style: const TextStyle(
-                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
@@ -49,7 +45,6 @@ Future<dynamic> onChangeColoronPress(BuildContext context, int? selectedColor) {
                       onPressed: () => Navigator.of(context).pop(),
                       child: const Text(
                         "Cancel",
-                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                     const SizedBox(width: 8),

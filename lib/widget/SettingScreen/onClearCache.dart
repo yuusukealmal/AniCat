@@ -7,13 +7,10 @@ Future<dynamic> onClearCache(BuildContext context) async {
     context: context,
     builder: (BuildContext context) {
       return Dialog(
-        backgroundColor: Colors.transparent,
         child: Material(
-          color: Colors.transparent,
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.8),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -23,7 +20,6 @@ Future<dynamic> onClearCache(BuildContext context) async {
                 Text(
                   "Clear Cache",
                   style: const TextStyle(
-                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
@@ -31,7 +27,6 @@ Future<dynamic> onClearCache(BuildContext context) async {
                 const SizedBox(height: 8),
                 Text(
                   "Are you sure you want to clear cache?",
-                  style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -41,7 +36,6 @@ Future<dynamic> onClearCache(BuildContext context) async {
                       onPressed: () => Navigator.of(context).pop(),
                       child: const Text(
                         "Cancel",
-                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                     const SizedBox(width: 8),

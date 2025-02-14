@@ -55,8 +55,9 @@ class _SettingScreenState extends State<SettingScreen>
                           title: const Text("Change Download Path"),
                           subtitle: Text(snapshot.data!.path),
                           trailing: Padding(
-                              padding: EdgeInsets.only(right: 10.0),
-                              child: Icon(Icons.folder)),
+                            padding: EdgeInsets.only(right: 10.0),
+                            child: Icon(Icons.folder),
+                          ),
                         ),
                         onTap: () async {
                           String? changeDownloadPath =
