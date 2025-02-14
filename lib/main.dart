@@ -12,11 +12,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) {
-          final colorNotifier = ColorNotifier();
-          colorNotifier.init();
-          return colorNotifier;
-        }),
+        ChangeNotifierProvider(create: (_) => ColorProvider()),
       ],
       child: const MyApp(),
     ),
@@ -38,7 +34,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final color = Provider.of<ColorNotifier>(context);
+    final color = Provider.of<ColorProvider>(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(

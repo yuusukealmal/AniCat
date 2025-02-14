@@ -50,9 +50,9 @@ Future<dynamic> onChangeColoronPress(BuildContext context, int? selectedColor) {
                     const SizedBox(width: 8),
                     TextButton(
                       onPressed: () async {
-                        final colorNotifier =
-                            Provider.of<ColorNotifier>(context, listen: false);
-                        colorNotifier.setColor(Color(selectedColor!));
+                        final colorProvider =
+                            Provider.of<ColorProvider>(context, listen: false);
+                        colorProvider.setColor(Color(selectedColor!));
                         Navigator.of(context).pop();
                       },
                       child: const Text(

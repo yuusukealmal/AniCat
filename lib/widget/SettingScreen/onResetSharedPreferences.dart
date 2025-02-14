@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/config/notifier/HomeColorProvider.dart';
+import 'package:anicat/config/notifier/ThemeProvider.dart';
 
 Future<dynamic> onResetSharedPreferences(BuildContext context) async {
   showDialog(
@@ -44,10 +45,12 @@ Future<dynamic> onResetSharedPreferences(BuildContext context) async {
                     TextButton(
                       onPressed: () async {
                         await SharedPreferencesHelper.reset();
-                        final colorNotifier =
-                            Provider.of<ColorNotifier>(context, listen: false);
-                        colorNotifier.setColor(Color(
-                            SharedPreferencesHelper.getInt("Home.Color")!));
+                        final colorProvider =
+                            Provider.of<ColorProvider>(context, listen: false);
+                        await colorProvider.init();
+                        final themeProvider =
+                            Provider.of<ThemeProvider>(context, listen: false);
+                        await themeProvider.init();
                         Navigator.of(context).pop();
                       },
                       child: const Text(
