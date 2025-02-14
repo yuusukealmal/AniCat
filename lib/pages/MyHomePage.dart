@@ -157,7 +157,8 @@ class _MyHomePageState extends State<MyHomePage>
                                 icon: const Icon(Icons.add),
                                 onPressed: () {
                                   setState(() {
-                                    if (!catId.contains(anime[0])) {
+                                    if (!catId.contains(
+                                        "https://anime1.me/?cat=${anime[0]}")) {
                                       catId.add(
                                           "https://anime1.me/?cat=${anime[0]}");
                                       secected++;
