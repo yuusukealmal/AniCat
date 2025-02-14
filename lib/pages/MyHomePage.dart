@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:anicat/api/AnimeList.dart';
 import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
 import 'package:anicat/config/notifier/ThemeProvider.dart';
@@ -26,10 +27,12 @@ final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 class _MyHomePageState extends State<MyHomePage>
     with PathHandle, ImgCache, ScreenRotate, RouteAware {
   List<String> folders = [];
+  List<List<dynamic>> animes = [];
 
   @override
   void initState() {
     super.initState();
+    _getManifest();
     _loadFolders();
   }
 
@@ -46,6 +49,16 @@ class _MyHomePageState extends State<MyHomePage>
     });
   }
 
+  Future<void> _getManifest() async {
+    List<List<dynamic>> animeList = await getAnimeList();
+    setState(() {
+      animes = animeList;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Got ${animes.length} animes")),
+    );
+  }
+
   @override
   void didPopNext() {
     _loadFolders();
@@ -60,164 +73,236 @@ class _MyHomePageState extends State<MyHomePage>
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController textController = TextEditingController();
-        return Dialog(
-          child: Material(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Enter Anime1 URL',
-                    style: TextStyle(fontSize: 18),
+        TextEditingController _textController = TextEditingController();
+        List<String> catId = [];
+        int secected = 0;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            List<List<dynamic>> filteredAnimes = animes
+                .where((anime) =>
+                    !anime[1].toString().toLowerCase().contains("https://") &&
+                    anime[1]
+                        .toString()
+                        .toLowerCase()
+                        .contains(_textController.text.toLowerCase()))
+                .toList();
+            return Dialog(
+              child: Material(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: textController,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter URL here',
-                      enabledBorder: UnderlineInputBorder(
-                          ),
-                      focusedBorder: UnderlineInputBorder(
-                          ),
-                    ),
-                    style: const TextStyle(
-                        ), // White text color
-                    maxLines: 1,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
+                      const Text(
+                        'Enter Anime1 URL',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _textController,
+                        onChanged: (value) {
+                          setState(() {});
                         },
-                        child: const Text(
-                          'Cancel',
+                        decoration: const InputDecoration(
+                          hintText: 'Enter URL here',
+                          enabledBorder: UnderlineInputBorder(),
+                          focusedBorder: UnderlineInputBorder(),
+                        ),
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text("符合條件的數量: ${filteredAnimes.length}"),
+                          SizedBox(width: 16),
+                          Text("已選擇數量 : $secected"),
+                        ],
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: filteredAnimes.isEmpty
+                              ? 1
+                              : filteredAnimes.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            if (filteredAnimes.isEmpty) {
+                              String text =
+                                  _textController.text.startsWith("https://")
+                                      ? "使用https連結下載"
+                                      : "找不到符合條件的動漫";
+                              return ListTile(
+                                title: Text(
+                                  text,
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              );
+                            }
+                            List<dynamic> anime = filteredAnimes[index];
+                            return ListTile(
+                              title: Text(
+                                anime[1].toString(),
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              subtitle: Text(
+                                "${anime[3]} ${anime[4]} ${anime[2]}",
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: () {
+                                  setState(() {
+                                    if (!catId.contains(anime[0])) {
+                                      catId.add(
+                                          "https://anime1.me/?cat=${anime[0]}");
+                                      secected++;
+                                    }
+                                  });
+                                },
+                              ),
+                            );
+                          },
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: () {
-                          final inputUrl = textController.text;
-                          Navigator.of(context).pop();
-                          parse(inputUrl).then((urls) async {
-                            if (urls.isEmpty) {
-                              if (mounted) {
-                                animeInvalidDialog(context);
-                              }
-                            }
-                            urls = urls.reversed.toList();
-                            String folder = urls.removeAt(0);
-                            for (String url in urls) {
-                              MP4 anime = MP4(folder: folder, url: url);
-                              await anime.init();
-                              debugPrint("Get Started for ${anime.title}");
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Cancel'),
+                          ),
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: () {
+                              List<String> inputList = catId.isNotEmpty
+                                  ? catId
+                                  : [_textController.text];
+                              Navigator.of(context).pop();
+                              for (String inputUrl in inputList) {
+                                parse(inputUrl).then((urls) async {
+                                  if (urls.isEmpty) {
+                                    if (mounted) {
+                                      animeInvalidDialog(context);
+                                    }
+                                  }
+                                  urls = urls.reversed.toList();
+                                  String folder = urls.removeAt(0);
+                                  for (String url in urls) {
+                                    MP4 anime = MP4(folder: folder, url: url);
+                                    await anime.init();
+                                    debugPrint(
+                                        "Get Started for ${anime.title}");
 
-                              double _progress = 0.0;
-                              int _current = 0;
-                              bool _isOverlayVisible = false;
+                                    double _progress = 0.0;
+                                    int _current = 0;
+                                    bool _isOverlayVisible = false;
 
-                              OverlayEntry? overlayEntry;
+                                    OverlayEntry? overlayEntry;
 
-                              void updateOverlay() {
-                                overlayEntry?.markNeedsBuild();
-                              }
+                                    void updateOverlay() {
+                                      overlayEntry?.markNeedsBuild();
+                                    }
 
-                              if (!_isOverlayVisible) {
-                                _isOverlayVisible = true;
+                                    if (!_isOverlayVisible) {
+                                      _isOverlayVisible = true;
 
-                                overlayEntry = OverlayEntry(
-                                  builder: (context) {
-                                    return Positioned(
-                                      bottom: 50,
-                                      left: 20,
-                                      right: 20,
-                                      child: Material(
-                                        child: Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Downloading ${anime.title}',
+                                      overlayEntry = OverlayEntry(
+                                        builder: (context) {
+                                          return Positioned(
+                                            bottom: 50,
+                                            left: 20,
+                                            right: 20,
+                                            child: Material(
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.all(16),
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                        'Downloading ${anime.title}'),
+                                                    const SizedBox(height: 8),
+                                                    LinearProgressIndicator(
+                                                        value: _progress),
+                                                    const SizedBox(height: 8),
+                                                    Text(
+                                                        '${convertMB(_current)}/${convertMB(anime.size)}  ${(_progress * 100).toStringAsFixed(2)}% Completed'),
+                                                  ],
+                                                ),
                                               ),
-                                              const SizedBox(height: 8),
-                                              LinearProgressIndicator(
-                                                  value: _progress),
-                                              const SizedBox(height: 8),
-                                              Text(
-                                                '${convertMB(_current)}/${convertMB(anime.size)}  '
-                                                '${(_progress * 100).toStringAsFixed(2)}% Completed',
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
+                                            ),
+                                          );
+                                        },
+                                      );
 
-                                Overlay.of(super.context).insert(overlayEntry);
-                              }
+                                      Overlay.of(super.context)
+                                          .insert(overlayEntry);
+                                    }
 
-                              anime.progressStream.listen((progress) async {
-                                _progress = progress;
-                                _current = anime.current;
+                                    anime.progressStream
+                                        .listen((progress) async {
+                                      _progress = progress;
+                                      _current = anime.current;
 
-                                updateOverlay();
+                                      updateOverlay();
 
-                                if (_progress >= 1.0) {
+                                      if (_progress >= 1.0) {
+                                        debugPrint("Download Completed");
+
+                                        await _loadFolders();
+                                        await checkCache(folder, anime);
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(super.context)
+                                              .showSnackBar(SnackBar(
+                                            content: Text(
+                                                "Download Completed ${anime.title}"),
+                                            duration: Duration(seconds: 1),
+                                          ));
+                                        }
+
+                                        overlayEntry?.remove();
+                                        _isOverlayVisible = false;
+                                      }
+                                    });
+
+                                    await anime.download();
+
+                                    if (_isOverlayVisible) {
+                                      overlayEntry.remove();
+                                      _isOverlayVisible = false;
+                                    }
+                                  }
                                   debugPrint("Download Completed");
-
-                                  await _loadFolders();
-                                  checkCache(folder, anime);
-                                  ScaffoldMessenger.of(super.context)
-                                      .showSnackBar(SnackBar(
-                                    content: Text(
-                                        "Download Completed ${anime.title}"),
-                                    duration: Duration(seconds: 1),
-                                  ));
-
-                                  overlayEntry?.remove();
-                                  _isOverlayVisible = false;
-                                }
-                              });
-
-                              await anime.download();
-
-                              if (_isOverlayVisible) {
-                                overlayEntry.remove();
-                                _isOverlayVisible = false;
+                                }).catchError((error) {
+                                  debugPrint("Error: $error");
+                                });
                               }
-                            }
-                            debugPrint("Download Completed");
-                          }).catchError((error) {
-                            debugPrint(error.toString());
-                          });
-                        },
-                        child: const Text(
-                          'OK',
-                        ),
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

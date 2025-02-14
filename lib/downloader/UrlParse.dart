@@ -6,9 +6,12 @@ Future<List<String>> parse(String url) async {
   List<String> list = [];
   RegExp esp = RegExp(r'anime1.me/[0-9]');
   RegExp season = RegExp(r'anime1.me/category/(.*?)');
+  RegExp cat = RegExp(r'anime1\.me\/\?cat=\d+');
   if (esp.hasMatch(url)) {
     list.add(url);
   } else if (season.hasMatch(url)) {
+    await getEpisode(url).then((value) => list.addAll(value));
+  } else if (cat.hasMatch(url)) {
     await getEpisode(url).then((value) => list.addAll(value));
   }
   return list;
