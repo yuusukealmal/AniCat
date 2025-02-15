@@ -74,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage>
       context: context,
       builder: (BuildContext context) {
         TextEditingController _textController = TextEditingController();
-        List<String> catId = [];
+        List<int> catId = [];
         int secected = 0;
 
         return StatefulBuilder(
@@ -99,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Enter Anime1 URL',
+                        'Anime Selector',
                         style: TextStyle(fontSize: 18),
                       ),
                       const SizedBox(height: 8),
@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage>
                           setState(() {});
                         },
                         decoration: const InputDecoration(
-                          hintText: 'Enter URL here',
+                          hintText: 'Enter Anime URL or Title here',
                           enabledBorder: UnderlineInputBorder(),
                           focusedBorder: UnderlineInputBorder(),
                         ),
@@ -154,13 +154,16 @@ class _MyHomePageState extends State<MyHomePage>
                                 style: TextStyle(fontSize: 14),
                               ),
                               trailing: IconButton(
-                                icon: const Icon(Icons.add),
+                                icon: catId.contains(anime[0])
+                                    ? Icon(Icons.remove)
+                                    : Icon(Icons.add),
                                 onPressed: () {
                                   setState(() {
-                                    if (!catId.contains(
-                                        "https://anime1.me/?cat=${anime[0]}")) {
-                                      catId.add(
-                                          "https://anime1.me/?cat=${anime[0]}");
+                                    if (catId.contains(anime[0])) {
+                                      catId.remove(anime[0]);
+                                      secected--;
+                                    } else {
+                                      catId.add(anime[0]);
                                       secected++;
                                     }
                                   });
@@ -185,6 +188,8 @@ class _MyHomePageState extends State<MyHomePage>
                             onPressed: () {
                               List<String> inputList = catId.isNotEmpty
                                   ? catId
+                                      .map((id) => "https://anime1.me/?cat=$id")
+                                      .toList()
                                   : [_textController.text];
                               Navigator.of(context).pop();
                               for (String inputUrl in inputList) {

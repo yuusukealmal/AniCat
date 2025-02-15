@@ -15,6 +15,7 @@ analyzer:
     no_leading_underscores_for_local_identifiers: ignore
     prefer_final_fields: ignore
     unused_element: ignore
+    camel_case_types: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:
