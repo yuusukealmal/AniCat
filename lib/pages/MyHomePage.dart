@@ -78,8 +78,7 @@ class _MyHomePageState extends State<MyHomePage>
       context: context,
       builder: (BuildContext context) {
         TextEditingController _textController = TextEditingController();
-        List<int> catId = [];
-        int secected = 0;
+        List<List<dynamic>> catId = [];
 
         return StatefulBuilder(
           builder: (context, setState) {
@@ -125,7 +124,43 @@ class _MyHomePageState extends State<MyHomePage>
                         children: [
                           Text("符合條件的數量: ${filteredAnimes.length}"),
                           SizedBox(width: 16),
-                          Text("已選擇數量 : $secected"),
+                          Text("已選擇數量 : ${catId.length}"),
+                          SizedBox(width: 16),
+                          TextButton(
+                            child: Text("顯示選擇清單"),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return StatefulBuilder(
+                                    builder: (context, setState) {
+                                      return Dialog(
+                                        child: ListView.builder(
+                                          itemCount: catId.length,
+                                          shrinkWrap: true,
+                                          itemBuilder: (context, index) {
+                                            List<String> anime = catId[index]
+                                                .map((e) => e.toString())
+                                                .toList();
+                                            return ListTile(
+                                              title: Text(
+                                                anime[1],
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              subtitle: Text(
+                                                "${anime[3]} ${anime[4]} ${anime[2]}",
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                            },
+                          )
                         ],
                       ),
                       Expanded(
@@ -158,18 +193,14 @@ class _MyHomePageState extends State<MyHomePage>
                                 style: TextStyle(fontSize: 14),
                               ),
                               trailing: IconButton(
-                                icon: catId.contains(anime[0])
+                                icon: catId.contains(anime)
                                     ? Icon(Icons.remove)
                                     : Icon(Icons.add),
                                 onPressed: () {
                                   setState(() {
-                                    if (catId.contains(anime[0])) {
-                                      catId.remove(anime[0]);
-                                      secected--;
-                                    } else {
-                                      catId.add(anime[0]);
-                                      secected++;
-                                    }
+                                    catId.contains(anime)
+                                        ? catId.remove(anime)
+                                        : catId.add(anime);
                                   });
                                 },
                               ),
