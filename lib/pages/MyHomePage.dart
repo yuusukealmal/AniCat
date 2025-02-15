@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage>
   Future<void> _getManifest() async {
     List<List<dynamic>> animeList = await getAnimeList();
     setState(() {
-      animes = animeList;
+      animes = animeList.where((e) => !e[1].contains("https://")).toList();
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Got ${animes.length} animes")),
@@ -83,12 +83,10 @@ class _MyHomePageState extends State<MyHomePage>
         return StatefulBuilder(
           builder: (context, setState) {
             List<List<dynamic>> filteredAnimes = animes
-                .where((anime) =>
-                    !anime[1].toString().toLowerCase().contains("https://") &&
-                    anime[1]
-                        .toString()
-                        .toLowerCase()
-                        .contains(_textController.text.toLowerCase()))
+                .where((anime) => anime[1]
+                    .toString()
+                    .toLowerCase()
+                    .contains(_textController.text.toLowerCase()))
                 .toList();
             return Dialog(
               child: Material(
@@ -172,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage>
                           itemBuilder: (context, index) {
                             if (filteredAnimes.isEmpty) {
                               String text =
-                                  _textController.text.startsWith("https://")
+                                  _textController.text.startsWith("https")
                                       ? "使用https連結下載"
                                       : "找不到符合條件的動漫";
                               return ListTile(
