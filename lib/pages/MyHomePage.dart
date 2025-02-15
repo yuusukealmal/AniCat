@@ -28,6 +28,7 @@ class _MyHomePageState extends State<MyHomePage>
     with PathHandle, ImgCache, ScreenRotate, RouteAware {
   List<String> folders = [];
   List<List<dynamic>> animes = [];
+  bool isDownloading = false;
 
   @override
   void initState() {
@@ -70,6 +71,9 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   void _onAddButtonPressed() {
+    setState(() {
+      isDownloading = true;
+    });
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -179,6 +183,9 @@ class _MyHomePageState extends State<MyHomePage>
                         children: [
                           TextButton(
                             onPressed: () {
+                              setState(() {
+                                isDownloading = false;
+                              });
                               Navigator.of(context).pop();
                             },
                             child: const Text('Cancel'),
@@ -294,6 +301,9 @@ class _MyHomePageState extends State<MyHomePage>
                                     }
                                   }
                                   debugPrint("Download Completed");
+                                  setState(() {
+                                    isDownloading = false;
+                                  });
                                 }).catchError((error) {
                                   debugPrint("Error: $error");
                                 });
@@ -394,9 +404,7 @@ class _MyHomePageState extends State<MyHomePage>
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _onAddButtonPressed();
-        },
+        onPressed: isDownloading ? null : _onAddButtonPressed,
         tooltip: "Add Anime1 URL",
         child: const Icon(Icons.add),
       ),
