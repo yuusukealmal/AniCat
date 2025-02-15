@@ -34,7 +34,8 @@ class Anime {
     response = await http.post(api, headers: getHeader(), body: xsend);
 
     dynamic json = jsonDecode(response.body);
-    realUrl += json['s'][0]['src'];
+    int index = json['s'][0]['type'] == "application/x-mpegURL" ? 1 : 0;
+    realUrl += json['s'][index]['src'];
 
     String set = response.headers['set-cookie']!;
     String? e = RegExp(r"e=(.*?);").firstMatch(set)!.group(1);
