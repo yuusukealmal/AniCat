@@ -71,9 +71,6 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   void _onAddButtonPressed() {
-    setState(() {
-      isDownloading = true;
-    });
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -127,36 +124,63 @@ class _MyHomePageState extends State<MyHomePage>
                           TextButton(
                             child: Text("顯示選擇清單"),
                             onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return StatefulBuilder(
-                                    builder: (context, setState) {
-                                      return Dialog(
-                                        child: ListView.builder(
-                                          itemCount: catId.length,
-                                          shrinkWrap: true,
-                                          itemBuilder: (context, index) {
-                                            List<String> anime = catId[index]
-                                                .map((e) => e.toString())
-                                                .toList();
-                                            return ListTile(
-                                              title: Text(
-                                                anime[1],
-                                                style: TextStyle(fontSize: 16),
+                              if (catId.isNotEmpty) {
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (BuildContext context) {
+                                    return Dialog(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ListView.builder(
+                                            itemCount: catId.length,
+                                            shrinkWrap: true,
+                                            itemBuilder: (context, index) {
+                                              List<String> anime = catId[index]
+                                                  .map((e) => e.toString())
+                                                  .toList();
+                                              return ListTile(
+                                                title: Text(
+                                                  anime[1],
+                                                  style:
+                                                      TextStyle(fontSize: 16),
+                                                ),
+                                                subtitle: Text(
+                                                  "${anime[3]} ${anime[4]} ${anime[2]}",
+                                                  style:
+                                                      TextStyle(fontSize: 14),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                          SizedBox(height: 16),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              TextButton(
+                                                child: Text("關閉"),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
                                               ),
-                                              subtitle: Text(
-                                                "${anime[3]} ${anime[4]} ${anime[2]}",
-                                                style: TextStyle(fontSize: 14),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              );
+                                              SizedBox(width: 16),
+                                            ],
+                                          ),
+                                          SizedBox(height: 16),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("沒有選擇任何動漫"),
+                                  ),
+                                );
+                              }
                             },
                           )
                         ],
@@ -222,6 +246,9 @@ class _MyHomePageState extends State<MyHomePage>
                           const SizedBox(width: 8),
                           TextButton(
                             onPressed: () {
+                              setState(() {
+                                isDownloading = true;
+                              });
                               List<String> inputList = catId.isNotEmpty
                                   ? catId
                                       .map((id) => "https://anime1.me/?cat=$id")
