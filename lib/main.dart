@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/config/notifier/HomeColorProvider.dart';
 import 'package:anicat/config/notifier/ThemeProvider.dart';
+import 'package:anicat/config/notifier/OverlayProvider.dart';
 import 'package:anicat/pages/MyHomePage.dart';
 
 void main() async {
@@ -13,6 +14,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => ColorProvider()),
+        ChangeNotifierProvider(create: (_) => Overlayprovider()),
       ],
       child: const MyApp(),
     ),

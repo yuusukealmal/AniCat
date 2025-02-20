@@ -276,90 +276,20 @@ class _MyHomePageState extends State<MyHomePage>
                                         "Get Started for ${anime.title}");
 
                                     double _progress = 0.0;
-                                    int _current = 0;
-                                    bool _isOverlayVisible = false;
-
-                                    OverlayEntry? overlayEntry;
-
-                                    void updateOverlay() {
-                                      overlayEntry?.markNeedsBuild();
-                                    }
-
-                                    if (!_isOverlayVisible) {
-                                      _isOverlayVisible = true;
-
-                                      overlayEntry = OverlayEntry(
-                                        builder: (context) {
-                                          return Positioned(
-                                            bottom: 50,
-                                            left: 20,
-                                            right: 20,
-                                            child: Material(
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.all(16),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                        'Downloading ${anime.title}'),
-                                                    const SizedBox(height: 8),
-                                                    LinearProgressIndicator(
-                                                        value: _progress),
-                                                    const SizedBox(height: 8),
-                                                    Text(
-                                                        '${convertMB(_current)}/${convertMB(anime.size)}  ${(_progress * 100).toStringAsFixed(2)}% Completed'),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      );
-
-                                      Overlay.of(super.context)
-                                          .insert(overlayEntry);
-                                    }
 
                                     anime.progressStream
                                         .listen((progress) async {
                                       _progress = progress;
-                                      _current = anime.current;
-
-                                      updateOverlay();
 
                                       if (_progress >= 1.0) {
                                         debugPrint("Download Completed");
 
                                         await _loadFolders();
                                         await checkCache(folder, anime);
-                                        if (mounted) {
-                                          ScaffoldMessenger.of(super.context)
-                                              .showSnackBar(SnackBar(
-                                            content: Text(
-                                                "Download Completed ${anime.title}"),
-                                            duration: Duration(seconds: 1),
-                                          ));
-                                        }
-
-                                        overlayEntry?.remove();
-                                        _isOverlayVisible = false;
                                       }
                                     });
 
-                                    await anime.download();
-
-                                    if (_isOverlayVisible) {
-                                      overlayEntry.remove();
-                                      _isOverlayVisible = false;
-                                    }
+                                    await anime.download(super.context);
                                   }
                                   debugPrint("Download Completed");
                                   setState(() {
