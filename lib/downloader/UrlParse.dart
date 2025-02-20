@@ -4,8 +4,8 @@ import 'package:anicat/downloader/CookieHandle.dart';
 
 Future<List<String>> parse(String url) async {
   List<String> list = [];
-  RegExp esp = RegExp(r'anime1.me/[0-9]');
-  RegExp season = RegExp(r'anime1.me/category/(.*?)');
+  RegExp esp = RegExp(r'anime1.me\/[0-9]');
+  RegExp season = RegExp(r'anime1.me\/category\/(.*?)');
   RegExp cat = RegExp(r'anime1\.me\/\?cat=\d+');
   if (esp.hasMatch(url)) {
     list.add(url);

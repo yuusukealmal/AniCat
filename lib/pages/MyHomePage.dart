@@ -120,7 +120,11 @@ class _MyHomePageState extends State<MyHomePage>
                           Text("符合條件的數量: ${filteredAnimes.length}"),
                           SizedBox(width: 16),
                           Text("已選擇數量 : ${catId.length}"),
-                          SizedBox(width: 16),
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                           TextButton(
                             child: Text("顯示選擇清單"),
                             onPressed: () {
@@ -251,7 +255,8 @@ class _MyHomePageState extends State<MyHomePage>
                               });
                               List<String> inputList = catId.isNotEmpty
                                   ? catId
-                                      .map((id) => "https://anime1.me/?cat=$id")
+                                      .map((id) =>
+                                          "https://anime1.me/?cat=${id[0]}")
                                       .toList()
                                   : [_textController.text];
                               Navigator.of(context).pop();
