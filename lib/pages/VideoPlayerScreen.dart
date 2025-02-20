@@ -25,9 +25,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
 
   @override
   void initState() {
+    super.initState();
     setLandscapeMode();
     Provider.of<Overlayprovider>(context, listen: false).setIsVideoScreen(true);
-    super.initState();
   }
 
   @override
@@ -43,12 +43,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     _videoPlayerController!.setPlaybackSpeed(playbackSpeed);
     final overlayprovider =
         Provider.of<Overlayprovider>(context, listen: false);
+    overlayprovider.removeOverlay();
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
           overlayprovider.setIsVideoScreen(false);
-          overlayprovider.updateOverlay(context);
+          overlayprovider.showOverlay(context);
         }
       },
       child: VideoView(

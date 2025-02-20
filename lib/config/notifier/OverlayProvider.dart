@@ -42,38 +42,28 @@ class Overlayprovider extends ChangeNotifier {
     );
   }
 
-  void showOverlay(BuildContext context,
-      {String? title, double? progress, int? downloaded, int? length}) {
-    _title = title;
-    _progress = progress ?? _progress;
-    _downloaded = downloaded ?? _downloaded;
+  void showOverlay(BuildContext context, {String? title, int? length}) {
+    _title = title ?? _title;
     _length = length ?? _length;
-    if (!_isOverlayShow) {
-      _isOverlayShow = true;
+    removeOverlay();
+    if (!_isVideoScreen) {
       _overlayEntry = _createOverlayEntry(context);
       Overlay.of(context).insert(_overlayEntry!);
+      _isOverlayShow = true;
     }
-  }
-
-  void updateOverlay(BuildContext context,
-      {double? progress, int? downloaded, int? length}) {
-    _progress = progress ?? _progress;
-    _downloaded = downloaded ?? _downloaded;
-    _length = length ?? _length;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      removeOverlay();
-      if (!_isVideoScreen) {
-        _overlayEntry = _createOverlayEntry(context);
-        Overlay.of(context).insert(_overlayEntry!);
-        _isOverlayShow = true;
-      }
-    });
   }
 
   void removeOverlay() {
     if (_isOverlayShow) {
-      _isOverlayShow = false;
       _overlayEntry?.remove();
+      _overlayEntry = null;
+      _isOverlayShow = false;
     }
+  }
+
+  void updateOverlayIfNeeded({double? progress, int? downloaded}) {
+    _progress = progress ?? _progress;
+    _downloaded = downloaded ?? _downloaded;
+    _overlayEntry?.markNeedsBuild();
   }
 }

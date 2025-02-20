@@ -102,14 +102,13 @@ class MP4 extends Anime with PathHandle {
       }
 
       final sink = file.openWrite();
-      overlayProvider.showOverlay(context,
-          title: title, length: _length, progress: 0.0);
+      overlayProvider.showOverlay(context, title: title, length: _length);
       await response.stream.listen((chunk) {
         _downloaded += chunk.length;
         sink.add(chunk);
         double progress = _downloaded / _length;
         progressController.add(progress);
-        overlayProvider.updateOverlay(context,
+        overlayProvider.updateOverlayIfNeeded(
             progress: progress, downloaded: _downloaded);
         if (_downloaded == _length) {
           debugPrint("Download Finished for $title with force");
