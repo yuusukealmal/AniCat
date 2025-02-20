@@ -249,9 +249,6 @@ class _MyHomePageState extends State<MyHomePage>
                           const SizedBox(width: 8),
                           TextButton(
                             onPressed: () {
-                              setState(() {
-                                isDownloading = true;
-                              });
                               List<String> inputList = catId.isNotEmpty
                                   ? catId
                                       .map((id) =>
@@ -264,8 +261,12 @@ class _MyHomePageState extends State<MyHomePage>
                                   if (urls.isEmpty) {
                                     if (mounted) {
                                       animeInvalidDialog(context);
+                                      return;
                                     }
                                   }
+                                  setState(() {
+                                    isDownloading = true;
+                                  });
                                   urls = urls.reversed.toList();
                                   String folder = urls.removeAt(0);
                                   for (String url in urls) {
