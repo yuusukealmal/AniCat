@@ -4,7 +4,6 @@ import 'package:anicat/api/AnimeList.dart';
 import 'package:anicat/config/notifier/ThemeProvider.dart';
 import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
-import 'package:anicat/functions/Calc.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
@@ -290,6 +289,7 @@ class _MyHomePageState extends State<MyHomePage>
                                     });
 
                                     await anime.download(super.context);
+                                    // await anime.download(super.context);
                                   }
                                   debugPrint("Download Completed");
                                   setState(() {
