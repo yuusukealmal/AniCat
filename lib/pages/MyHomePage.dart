@@ -255,6 +255,9 @@ class _MyHomePageState extends State<MyHomePage>
                                           "https://anime1.me/?cat=${id[0]}")
                                       .toList()
                                   : [_textController.text];
+                              setState(() {
+                                isDownloading = true;
+                              });
                               Navigator.of(context).pop();
                               for (String inputUrl in inputList) {
                                 parse(inputUrl).then((urls) async {
@@ -264,9 +267,6 @@ class _MyHomePageState extends State<MyHomePage>
                                       return;
                                     }
                                   }
-                                  setState(() {
-                                    isDownloading = true;
-                                  });
                                   urls = urls.reversed.toList();
                                   String folder = urls.removeAt(0);
                                   for (String url in urls) {
@@ -290,7 +290,6 @@ class _MyHomePageState extends State<MyHomePage>
                                     });
 
                                     await anime.download(super.context);
-                                    // await anime.download(super.context);
                                   }
                                   debugPrint("Download Completed");
                                   setState(() {

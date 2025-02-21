@@ -46,7 +46,7 @@ class Overlayprovider extends ChangeNotifier {
     _title = title ?? _title;
     _length = length ?? _length;
     removeOverlay();
-    if (!_isVideoScreen) {
+    if (!_isVideoScreen && _title!.isNotEmpty) {
       _overlayEntry = _createOverlayEntry(context);
       Overlay.of(context).insert(_overlayEntry!);
       _isOverlayShow = true;
