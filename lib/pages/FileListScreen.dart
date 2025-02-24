@@ -84,7 +84,8 @@ class _FileListScreenState extends State<FileListScreen>
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => VideoPlayerScreen(filePath: file.path)),
+                builder: (context) => VideoPlayerScreen(filePath: file.path),
+              ),
             );
           },
         );

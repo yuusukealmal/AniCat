@@ -26,7 +26,7 @@ dynamic onFolderDeletePress(
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "確定要刪除資料夾嗎?",
+                  "確定要 ${folderPath.split('/').last} 嗎?",
                 ),
                 const SizedBox(height: 16),
                 Row(
