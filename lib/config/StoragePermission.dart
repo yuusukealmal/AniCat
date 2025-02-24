@@ -19,13 +19,6 @@ mixin StoragePermission {
     return "Granted";
   }
 
-  String _getSize(String path) {
-    final bytes = File(path).lengthSync();
-    if (bytes < 1024) return "${bytes} B";
-    if (bytes < 1024 * 1024) return "${(bytes / 1024).toStringAsFixed(2)} KB";
-    return "${(bytes / 1024 / 1024).toStringAsFixed(2)} MB";
-  }
-
   Future<void> _askManageStoragePermission(BuildContext context) async {
     return showDialog(
       context: context,
@@ -136,10 +129,6 @@ mixin StoragePermission {
                                 title: Text(
                                   _getExternalStorageType(
                                       directories[index].path),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                subtitle: Text(
-                                  _getSize(directories[index].path),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 onTap: () {
