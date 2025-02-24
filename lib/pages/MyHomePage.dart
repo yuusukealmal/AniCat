@@ -247,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage>
                           ),
                           const SizedBox(width: 8),
                           TextButton(
-                            onPressed: () {
+                            onPressed: () async {
                               List<String> inputList = catId.isNotEmpty
                                   ? catId
                                       .map((id) =>
@@ -257,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage>
                               overlayProvider.setIsDownloading(true);
                               Navigator.of(context).pop();
                               for (String inputUrl in inputList) {
-                                parse(inputUrl).then((urls) async {
+                                await parse(inputUrl).then((urls) async {
                                   if (urls.isEmpty) {
                                     if (mounted) {
                                       animeInvalidDialog(context);
@@ -289,11 +289,11 @@ class _MyHomePageState extends State<MyHomePage>
                                     await anime.download(super.context);
                                   }
                                   debugPrint("Download Completed");
-                                  overlayProvider.setIsDownloading(false);
                                 }).catchError((error) {
                                   debugPrint("Error: $error");
                                 });
                               }
+                              overlayProvider.setIsDownloading(false);
                             },
                             child: const Text('OK'),
                           ),
