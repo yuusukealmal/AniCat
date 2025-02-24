@@ -71,7 +71,7 @@ class MP4 extends Anime with PathHandle {
 
   Future<void> download(BuildContext context) async {
     final overlayProvider =
-        Provider.of<Overlayprovider>(context, listen: false);
+        Provider.of<OverlayProvider>(context, listen: false);
     try {
       Uri url = Uri.parse(realUrl);
       http.Request request = http.Request('GET', url);

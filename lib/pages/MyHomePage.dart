@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:anicat/api/AnimeList.dart';
 import 'package:anicat/config/notifier/ThemeProvider.dart';
+import 'package:anicat/config/notifier/OverlayProvider.dart';
 import 'package:anicat/downloader/UrlParse.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
@@ -27,7 +28,7 @@ class _MyHomePageState extends State<MyHomePage>
     with PathHandle, ImgCache, ScreenRotate, RouteAware {
   List<String> folders = [];
   List<List<dynamic>> animes = [];
-  bool isDownloading = false;
+  late OverlayProvider overlayProvider;
 
   @override
   void initState() {
@@ -239,9 +240,7 @@ class _MyHomePageState extends State<MyHomePage>
                         children: [
                           TextButton(
                             onPressed: () {
-                              setState(() {
-                                isDownloading = false;
-                              });
+                              overlayProvider.setIsDownloading(false);
                               Navigator.of(context).pop();
                             },
                             child: const Text('Cancel'),
@@ -255,9 +254,7 @@ class _MyHomePageState extends State<MyHomePage>
                                           "https://anime1.me/?cat=${id[0]}")
                                       .toList()
                                   : [_textController.text];
-                              setState(() {
-                                isDownloading = true;
-                              });
+                              overlayProvider.setIsDownloading(true);
                               Navigator.of(context).pop();
                               for (String inputUrl in inputList) {
                                 parse(inputUrl).then((urls) async {
@@ -292,9 +289,7 @@ class _MyHomePageState extends State<MyHomePage>
                                     await anime.download(super.context);
                                   }
                                   debugPrint("Download Completed");
-                                  setState(() {
-                                    isDownloading = false;
-                                  });
+                                  overlayProvider.setIsDownloading(false);
                                 }).catchError((error) {
                                   debugPrint("Error: $error");
                                 });
@@ -317,6 +312,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   Widget build(BuildContext context) {
+    overlayProvider = Provider.of<OverlayProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -395,7 +391,7 @@ class _MyHomePageState extends State<MyHomePage>
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: isDownloading ? null : _onAddButtonPressed,
+        onPressed: overlayProvider.isDownloading ? null : _onAddButtonPressed,
         tooltip: "Add Anime1 URL",
         child: const Icon(Icons.add),
       ),

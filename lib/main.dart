@@ -14,7 +14,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => ColorProvider()),
-        ChangeNotifierProvider(create: (_) => Overlayprovider()),
+        ChangeNotifierProvider(create: (_) => OverlayProvider()),
       ],
       child: const MyApp(),
     ),

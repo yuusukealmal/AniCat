@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:anicat/functions/Calc.dart';
 
-class Overlayprovider extends ChangeNotifier {
-  bool _isOverlayShow = false, _isVideoScreen = false;
-  String? _title = "";
+class OverlayProvider extends ChangeNotifier {
+  bool _isOverlayShow = false, _isVideoScreen = false, _isDownloading = false;
+  String? _title;
   double _progress = 0;
   int _downloaded = 0, _length = 0;
   OverlayEntry? _overlayEntry;
   void setIsVideoScreen(bool value) => _isVideoScreen = value;
+
+  bool get isDownloading => _isDownloading;
+  void setIsDownloading(bool value) => _isDownloading = value;
 
   OverlayEntry _createOverlayEntry(BuildContext context) {
     return OverlayEntry(
@@ -46,7 +49,7 @@ class Overlayprovider extends ChangeNotifier {
     _title = title ?? _title;
     _length = length ?? _length;
     removeOverlay();
-    if (!_isVideoScreen && _title!.isNotEmpty) {
+    if (!_isVideoScreen && _isDownloading) {
       _overlayEntry = _createOverlayEntry(context);
       Overlay.of(context).insert(_overlayEntry!);
       _isOverlayShow = true;
