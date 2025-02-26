@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 
-class ColorNotifier with ChangeNotifier {
+class ColorProvider with ChangeNotifier {
   Color? _color;
+  Color? get color => _color ?? Color.fromARGB(255, 183, 58, 156);
 
-  Color? get color => _color;
+  ColorProvider() {
+    init();
+  }
 
   Future<void> init() async {
     final colorValue = SharedPreferencesHelper.getInt("Home.Color");

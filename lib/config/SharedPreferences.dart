@@ -65,6 +65,7 @@ class SharedPreferencesHelper with ChangeNotifier {
   static Future<void> reset() async {
     await _prefs?.clear();
     _prefs?.setInt("Home.Color", Color.fromARGB(255, 183, 58, 156).value);
+    _prefs?.setString('theme', 'light');
     _prefs?.setString(
         "Anime.DownloadPath", (await getExternalStorageDirectory())!.path);
     _prefs?.setBool("Video.AutoPlay", false);

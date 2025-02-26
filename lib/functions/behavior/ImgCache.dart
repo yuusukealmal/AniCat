@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:crypto/crypto.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';

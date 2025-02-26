@@ -10,7 +10,6 @@ mixin StoragePermission {
     if (status.isRestricted) {
       return "isRestricted";
     }
-
     if (status.isDenied) {
       return "isDenied";
     }
@@ -25,13 +24,10 @@ mixin StoragePermission {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          backgroundColor: Colors.transparent,
           child: Material(
-            color: Colors.transparent,
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -41,7 +37,6 @@ mixin StoragePermission {
                   Text(
                     "Access Denied",
                     style: const TextStyle(
-                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
@@ -49,7 +44,6 @@ mixin StoragePermission {
                   const SizedBox(height: 8),
                   Text(
                     "Please enable storage access in settings.",
-                    style: const TextStyle(color: Colors.white),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -61,7 +55,6 @@ mixin StoragePermission {
                         },
                         child: const Text(
                           "Open Settings",
-                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -105,13 +98,10 @@ mixin StoragePermission {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          backgroundColor: Colors.transparent,
           child: Material(
-            color: Colors.transparent,
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -121,7 +111,6 @@ mixin StoragePermission {
                   const Text(
                     "Select Folder",
                     style: TextStyle(
-                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
@@ -134,12 +123,12 @@ mixin StoragePermission {
                             shrinkWrap: true,
                             itemBuilder: (context, index) {
                               return ListTile(
-                                leading: const Icon(Icons.folder,
-                                    color: Colors.white),
+                                leading: const Icon(
+                                  Icons.folder,
+                                ),
                                 title: Text(
                                   _getExternalStorageType(
                                       directories[index].path),
-                                  style: const TextStyle(color: Colors.white),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 onTap: () {
@@ -154,7 +143,6 @@ mixin StoragePermission {
                       : const Center(
                           child: Text(
                             "No directories found",
-                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                   const SizedBox(height: 16),

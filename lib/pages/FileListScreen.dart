@@ -2,12 +2,12 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:anicat/functions/Calc.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
-import 'package:anicat/functions/Calc.dart';
-import 'package:anicat/widget/FileListScreen/getFileLeading.dart';
 import 'package:anicat/pages/VideoPlayerScreen.dart';
+import 'package:anicat/widget/FileListScreen/getFileLeading.dart';
 
 class FileListScreen extends StatefulWidget {
   final String folderPath;
@@ -84,7 +84,8 @@ class _FileListScreenState extends State<FileListScreen>
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => VideoPlayerScreen(filePath: file.path)),
+                builder: (context) => VideoPlayerScreen(filePath: file.path),
+              ),
             );
           },
         );

@@ -4,11 +4,13 @@ import 'package:anicat/downloader/CookieHandle.dart';
 
 Future<List<String>> parse(String url) async {
   List<String> list = [];
-  RegExp esp = RegExp(r'anime1.me/[0-9]');
-  RegExp season = RegExp(r'anime1.me/category/(.*?)');
+  RegExp esp = RegExp(r'anime1.me\/[0-9]');
+  RegExp season = RegExp(r'anime1.me\/category\/(.*?)');
+  RegExp cat = RegExp(r'anime1\.me\/\?cat=\d+');
   if (esp.hasMatch(url)) {
     list.add(url);
-  } else if (season.hasMatch(url)) {
+    list.add(await getTitle(url));
+  } else if (season.hasMatch(url) || cat.hasMatch(url)) {
     await getEpisode(url).then((value) => list.addAll(value));
   }
   return list;
@@ -40,4 +42,14 @@ Future<List<String>> getEpisode(String url) async {
     urls.add(title);
   }
   return urls;
+}
+
+Future<String> getTitle(String url) async {
+  Uri u = Uri.parse(Uri.decodeFull(url));
+  Map<String, String> headers = getHeader();
+  http.Response response = await http.get(u, headers: headers);
+  BeautifulSoup soup = BeautifulSoup(response.body);
+  String title =
+      soup.find('span', class_: "cat-links")!.text.split("分類: ").last;
+  return title;
 }

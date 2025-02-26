@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'package:anicat/config/notifier/OverlayProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_video_view/flutter_video_view.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
+import 'package:provider/provider.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final String filePath;
@@ -23,8 +25,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
 
   @override
   void initState() {
-    setLandscapeMode();
     super.initState();
+    setLandscapeMode();
+    Provider.of<OverlayProvider>(context, listen: false).setIsVideoScreen(true);
   }
 
   @override
@@ -38,15 +41,29 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   Widget build(BuildContext context) {
     _videoPlayerController = VideoPlayerController.file(File(widget.filePath));
     _videoPlayerController!.setPlaybackSpeed(playbackSpeed);
+    final overlayprovider =
+        Provider.of<OverlayProvider>(context, listen: false);
+    overlayprovider.removeOverlay();
 
-    return VideoView(
-      controller: VideoController(
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          overlayprovider.setIsVideoScreen(false);
+          overlayprovider.showOverlay(context);
+        }
+      },
+      child: VideoView(
+        controller: VideoController(
           videoPlayerController: _videoPlayerController!,
           videoConfig: VideoConfig(
-              title: widget.filePath.split('/').last,
-              showLock: true,
-              autoPlay: atuoPlay,
-              fullScreenByDefault: fullScreen)),
+            title: widget.filePath.split('/').last,
+            showLock: true,
+            autoPlay: atuoPlay,
+            fullScreenByDefault: fullScreen,
+            canCloseOnBack: true,
+          ),
+        ),
+      ),
     );
   }
 }

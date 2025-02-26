@@ -1,12 +1,13 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
-import 'package:anicat/functions/behavior/PathHandle.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
+import 'package:anicat/config/notifier/OverlayProvider.dart';
 import 'package:anicat/downloader/CookieHandle.dart';
+import 'package:anicat/functions/behavior/PathHandle.dart';
 
 class Anime {
   String folder;
@@ -16,7 +17,7 @@ class Anime {
   String? data;
   String xsend = "d=";
   Map<String, String> headers = getHeaderCookies();
-  int length = 0;
+  int _length = 0;
 
   Anime({required this.folder, required this.url});
 
@@ -34,7 +35,8 @@ class Anime {
     response = await http.post(api, headers: getHeader(), body: xsend);
 
     dynamic json = jsonDecode(response.body);
-    realUrl += json['s'][0]['src'];
+    int index = json['s'][0]['type'] == "application/x-mpegURL" ? 1 : 0;
+    realUrl += json['s'][index]['src'];
 
     String set = response.headers['set-cookie']!;
     String? e = RegExp(r"e=(.*?);").firstMatch(set)!.group(1);
@@ -67,7 +69,9 @@ class MP4 extends Anime with PathHandle {
     return f;
   }
 
-  Future<void> download() async {
+  Future<void> download(BuildContext context) async {
+    final overlayProvider =
+        Provider.of<OverlayProvider>(context, listen: false);
     try {
       Uri url = Uri.parse(realUrl);
       http.Request request = http.Request('GET', url);
@@ -77,14 +81,20 @@ class MP4 extends Anime with PathHandle {
       final file = File('${root.path}/$title.mp4');
       http.StreamedResponse response = await request.send();
 
-      length = response.contentLength!;
+      _length = response.contentLength!;
       _downloaded = 0;
       if (file.existsSync()) {
-        if (file.lengthSync() == length) {
-          debugPrint("File Exists $title, Size $length");
+        if (file.lengthSync() == _length) {
+          debugPrint("File Exists $title, Size $_length");
           progressController.add(1.0);
           await Future.delayed(const Duration(milliseconds: 100));
           progressController.close();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("File Exists $title"),
+              duration: Duration(seconds: 1),
+            ),
+          );
           return;
         } else {
           await file.delete();
@@ -92,38 +102,74 @@ class MP4 extends Anime with PathHandle {
       }
 
       final sink = file.openWrite();
+      overlayProvider.showOverlay(context, title: title, length: _length);
       await response.stream.listen((chunk) {
         _downloaded += chunk.length;
         sink.add(chunk);
-        double progress = _downloaded / length;
+        double progress = _downloaded / _length;
         progressController.add(progress);
-        if (_downloaded == length) {
+        overlayProvider.updateOverlayIfNeeded(
+            progress: progress, downloaded: _downloaded);
+        if (_downloaded == _length) {
           debugPrint("Download Finished for $title with force");
           progressController.close();
+          overlayProvider.removeOverlay();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Download Finished $title"),
+              duration: Duration(seconds: 1),
+            ),
+          );
         }
       }, onDone: () async {
         debugPrint("Download Finished for $title with onDone");
         await sink.close();
         progressController.close();
+        overlayProvider.removeOverlay();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Download Finished $title"),
+            duration: Duration(seconds: 1),
+          ),
+        );
       }, onError: (error) {
         debugPrint("Download Failed for $title, Cause by $error");
         progressController.close();
         sink.close();
+        overlayProvider.removeOverlay();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Download Failed $title, Cause by $error"),
+            duration: Duration(seconds: 1),
+          ),
+        );
         throw error;
       }, cancelOnError: true).asFuture();
     } catch (e) {
       debugPrint("Fail to Download $title, Cause by $e");
+      overlayProvider.removeOverlay();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Download Failed $title, Cause by $e"),
+          duration: Duration(seconds: 1),
+        ),
+      );
       if (retry > 0) {
         retry--;
-        download();
+        download(context);
       } else {
         debugPrint("Download Failed for $title");
         progressController.close();
+        overlayProvider.removeOverlay();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Download Failed $title"),
+            duration: Duration(seconds: 1),
+          ),
+        );
       }
     }
   }
 
-  int get current => _downloaded;
-  int get size => length;
   Stream<double> get progressStream => progressController.stream;
 }
