@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:anicat/pages/MyHomePage.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/functions/Calc.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/functions/behavior/ImgCache.dart';
@@ -75,18 +77,29 @@ class _FileListScreenState extends State<FileListScreen>
       itemBuilder: (context, index) {
         final file = _files[index] as File;
         final fileName = file.path.split('/').last;
+        String titleMd5 = sha256
+            .convert(utf8.encode(widget.folderPath.split("/").last))
+            .toString()
+            .substring(0, 16);
+        final lastView = SharedPreferencesHelper.getInt("LASTVIEW.$titleMd5");
         return ListTile(
-          title: Text(fileName),
+          title: index == lastView
+              ? Text(fileName,
+                  style:
+                      const TextStyle(color: Color.fromARGB(255, 6, 124, 235)))
+              : Text(fileName),
           subtitle: Text(getFileSize(file.lengthSync())),
           leading: getFileLeading(fileName, index, _fileCacheMap),
-          onTap: () {
+          onTap: () async {
             debugPrint('Tapped file: $fileName');
-            Navigator.push(
+            await SharedPreferencesHelper.setInt("LASTVIEW.$titleMd5", index);
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => VideoPlayerScreen(filePath: file.path),
               ),
             );
+            setState(() {});
           },
         );
       },
