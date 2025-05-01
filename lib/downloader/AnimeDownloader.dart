@@ -79,27 +79,30 @@ class MP4 extends Anime with PathHandle {
 
       Directory root = await getPath();
       final file = File('${root.path}/$title.mp4');
-      http.StreamedResponse response = await request.send();
 
-      _length = response.contentLength!;
-      _downloaded = 0;
-      if (file.existsSync()) {
-        if (file.lengthSync() == _length) {
-          debugPrint("File Exists $title, Size $_length");
-          progressController.add(1.0);
-          await Future.delayed(const Duration(milliseconds: 100));
-          progressController.close();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("File Exists $title"),
-              duration: Duration(seconds: 1),
-            ),
-          );
-          return;
-        } else {
-          await file.delete();
-        }
-      }
+    if (file.existsSync()) {
+      int fileLength = file.lengthSync();
+      request.headers["Range"] = "bytes=$fileLength-";
+      _downloaded = fileLength;
+    }
+
+    http.StreamedResponse response = await request.send();
+
+    _length = _downloaded + (response.contentLength ?? 0);
+
+    if (file.existsSync() && file.lengthSync() >= _length) {
+      debugPrint("File Exists $title, Size $_length");
+      progressController.add(1.0);
+      await Future.delayed(const Duration(milliseconds: 100));
+      progressController.close();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("File Exists $title"),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      return;
+    }
 
       final sink = file.openWrite();
       overlayProvider.showOverlay(context, title: title, length: _length);
