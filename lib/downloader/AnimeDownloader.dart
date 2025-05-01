@@ -104,7 +104,7 @@ class MP4 extends Anime with PathHandle {
       return;
     }
 
-      final sink = file.openWrite();
+      final sink = file.openWrite(mode: FileMode.append);
       overlayProvider.showOverlay(context, title: title, length: _length);
       await response.stream.listen((chunk) {
         _downloaded += chunk.length;
