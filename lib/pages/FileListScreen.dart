@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/functions/Calc.dart';
@@ -48,16 +46,12 @@ class _FileListScreenState extends State<FileListScreen>
 
   Future<void> _cacheImage(List<FileSystemEntity> files) async {
     for (FileSystemEntity file in files) {
-      String hash = sha256
-          .convert(
-              utf8.encode(file.path.split("/").last.replaceAll(".mp4", "")))
-          .toString()
-          .substring(0, 16);
+      String hash = getHash(file as File);
       Directory cacheImgFolder = await ImgCache.getImgCacheFolder();
       String path = "${cacheImgFolder.path}/$hash.png";
       if (!await File(path).exists()) {
         debugPrint("Downloading ${file.path}");
-        String thumbnailPath = await getThumbnail(file as File);
+        String thumbnailPath = await getThumbnail(file);
         setState(() {
           _fileCacheMap.add(thumbnailPath);
         });
@@ -75,22 +69,19 @@ class _FileListScreenState extends State<FileListScreen>
       itemCount: _files.length,
       itemBuilder: (context, index) {
         final file = _files[index] as File;
-        final fileName = file.path.split('/').last;
-        String titleMd5 = sha256
-            .convert(utf8.encode(widget.folderPath.split("/").last))
-            .toString()
-            .substring(0, 16);
+        String titleMd5 = getHash(file, Directory(widget.folderPath));
         final lastView = SharedPreferencesHelper.getInt("LASTVIEW.$titleMd5");
         return ListTile(
           title: index == lastView
-              ? Text(fileName,
+              ? Text(file.uri.pathSegments.last,
                   style:
                       const TextStyle(color: Color.fromARGB(255, 6, 124, 235)))
-              : Text(fileName),
+              : Text(file.uri.pathSegments.last),
           subtitle: Text(getFileSize(file.lengthSync())),
-          leading: getFileLeading(fileName, index, _fileCacheMap),
+          leading:
+              getFileLeading(file.uri.pathSegments.last, index, _fileCacheMap),
           onTap: () async {
-            debugPrint('Tapped file: $fileName');
+            debugPrint('Tapped file: ${file.uri.pathSegments.last}');
             await SharedPreferencesHelper.setInt("LASTVIEW.$titleMd5", index);
             await Navigator.push(
               context,

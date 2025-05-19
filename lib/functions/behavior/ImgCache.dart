@@ -18,11 +18,13 @@ mixin ImgCache {
     return cachePath;
   }
 
-  String getHash(String filePath) {
-    String hash = sha256
-        .convert(utf8.encode(filePath.split("/").last.replaceAll(".mp4", "")))
-        .toString()
-        .substring(0, 16);
+  String getHash(File file, [Directory? folder]) {
+    String toHash = folder == null
+        ? file.uri.pathSegments.last.replaceAll(".mp4", "")
+        : folder.uri.pathSegments.last;
+    String hash =
+        sha256.convert(utf8.encode(toHash)).toString().substring(0, 16);
+
     return hash;
   }
 
@@ -35,7 +37,7 @@ mixin ImgCache {
         quality: 100,
       );
 
-      String hash = getHash(file.path);
+      String hash = getHash(file);
       Directory cacheImgFolder = await getImgCacheFolder();
       String path = "${cacheImgFolder.path}/$hash.png";
       debugPrint("Saving $path");
@@ -51,7 +53,7 @@ mixin ImgCache {
     Directory animeFolder = await PathHandle.getDownloadPath();
     String path = "${animeFolder.path}/$folder/${anime.title}.mp4";
     Directory cacheImgFolder = await ImgCache.getImgCacheFolder();
-    String imgCachepath = "${cacheImgFolder.path}/${getHash(anime.title!)}.png";
+    String imgCachepath = "${cacheImgFolder.path}/${getHash(File(path))}.png";
     if (!File(imgCachepath).existsSync()) {
       await getThumbnail(File(path));
     }
