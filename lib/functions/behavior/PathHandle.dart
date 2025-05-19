@@ -26,9 +26,12 @@ mixin PathHandle {
 
   Future<List<FileSystemEntity>> loadFiles(String folderPath) async {
     final directory = Directory(folderPath);
-    List<FileSystemEntity> folders =
-        await directory.list().where((entity) => entity is File).toList();
-    return folders;
+    List<FileSystemEntity> files = await directory
+        .list()
+        .where((entity) =>
+            entity is File && !entity.path.endsWith('progress.json'))
+        .toList();
+    return files;
   }
 
   Future<void> openFolder(BuildContext context, String folderPath) async {

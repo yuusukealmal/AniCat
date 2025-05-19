@@ -65,6 +65,7 @@ class MP4 extends Anime with PathHandle {
     Directory f = Directory('${root.path}/$folder');
     if (!await f.exists()) {
       await f.create(recursive: true);
+      await File('${f.path}/progress.json').create(recursive: true);
     }
     return f;
   }
@@ -80,29 +81,29 @@ class MP4 extends Anime with PathHandle {
       Directory root = await getPath();
       final file = File('${root.path}/$title.mp4');
 
-    if (file.existsSync()) {
-      int fileLength = file.lengthSync();
-      request.headers["Range"] = "bytes=$fileLength-";
-      _downloaded = fileLength;
-    }
+      if (file.existsSync()) {
+        int fileLength = file.lengthSync();
+        request.headers["Range"] = "bytes=$fileLength-";
+        _downloaded = fileLength;
+      }
 
-    http.StreamedResponse response = await request.send();
+      http.StreamedResponse response = await request.send();
 
-    _length = _downloaded + (response.contentLength ?? 0);
+      _length = _downloaded + (response.contentLength ?? 0);
 
-    if (file.existsSync() && file.lengthSync() >= _length) {
-      debugPrint("File Exists $title, Size $_length");
-      progressController.add(1.0);
-      await Future.delayed(const Duration(milliseconds: 100));
-      progressController.close();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("File Exists $title"),
-          duration: Duration(seconds: 1),
-        ),
-      );
-      return;
-    }
+      if (file.existsSync() && file.lengthSync() >= _length) {
+        debugPrint("File Exists $title, Size $_length");
+        progressController.add(1.0);
+        await Future.delayed(const Duration(milliseconds: 100));
+        progressController.close();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("File Exists $title"),
+            duration: Duration(seconds: 1),
+          ),
+        );
+        return;
+      }
 
       final sink = file.openWrite(mode: FileMode.append);
       overlayProvider.showOverlay(context, title: title, length: _length);

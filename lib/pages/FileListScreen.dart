@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:convert';
-import 'package:anicat/pages/MyHomePage.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:anicat/config/SharedPreferences.dart';
