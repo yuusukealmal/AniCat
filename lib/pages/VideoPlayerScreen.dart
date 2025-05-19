@@ -62,9 +62,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     final overlayprovider =
         Provider.of<OverlayProvider>(context, listen: false);
     overlayprovider.removeOverlay();
-    const red = '\x1B[31m';
-    const reset = '\x1B[0m';
-    debugPrint("startTime: $red$startTime$reset");
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
