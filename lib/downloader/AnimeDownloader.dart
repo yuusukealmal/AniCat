@@ -160,7 +160,7 @@ class MP4 extends Anime with PathHandle {
       );
       if (retry > 0) {
         retry--;
-        download(context);
+        await download(context);
       } else {
         debugPrint("Download Failed for $title");
         progressController.close();
