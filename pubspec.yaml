@@ -30,6 +30,10 @@ dependencies:
   provider: ^6.1.2
   intl: ^0.20.2
   webview_flutter: ^4.10.0
+  flutter_media_metadata:
+    git:
+      url: https://github.com/yuusukealmal/flutter_media_metadata.git
+      ref: master
 
 dev_dependencies:
   flutter_test:

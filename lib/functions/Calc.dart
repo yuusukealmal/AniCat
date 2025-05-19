@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 
 String convertMB(int length) {
   double mb = length / 1024 / 1024;
@@ -11,4 +14,29 @@ String getFileSize(int length) {
   const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   int i = (log(length) / log(1024)).floor();
   return "${(length / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}";
+}
+
+String formatDuration(Duration duration) {
+  String twoDigits(int n) => n.toString().padLeft(2, '0');
+  final minutes = twoDigits(duration.inMinutes.remainder(60));
+  final seconds = twoDigits(duration.inSeconds.remainder(60));
+  final hours = duration.inHours;
+
+  if (hours > 0) {
+    return "$hours:$minutes:$seconds";
+  } else {
+    return "$minutes:$seconds";
+  }
+}
+
+Future<Duration> getVideoDuration(File file) async {
+  try {
+    final metadata = await MetadataRetriever.fromFile(file);
+    if (metadata.trackDuration != null) {
+      return Duration(milliseconds: metadata.trackDuration!);
+    }
+  } catch (e) {
+    debugPrint('無法讀取影片時間: $e');
+  }
+  return Duration.zero;
 }

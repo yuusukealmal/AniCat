@@ -26,22 +26,33 @@ class _FileListScreenState extends State<FileListScreen>
     with PathHandle, ImgCache, ScreenRotate {
   List<FileSystemEntity> _files = [];
   List<String> _fileCacheMap = [];
+  Map<String, Duration?> _durations = {};
 
   @override
   void initState() {
     super.initState();
-    loadFiles(widget.folderPath).then((value) {
-      setState(() {
-        _files = value;
-      });
-      _cacheImage(value);
-    });
+    _loadFiles();
   }
 
   @override
   void dispose() {
     setPortraitMode();
     super.dispose();
+  }
+
+  Future<void> _loadFiles() async {
+    final files = await loadFiles(widget.folderPath);
+    final durations = <String, Duration?>{};
+    for (final file in files) {
+      if (file is File) {
+        durations[file.path] = await getVideoDuration(file);
+      }
+    }
+    setState(() {
+      _files = files;
+      _durations = durations;
+    });
+    _cacheImage(files);
   }
 
   Future<void> _cacheImage(List<FileSystemEntity> files) async {
@@ -71,13 +82,16 @@ class _FileListScreenState extends State<FileListScreen>
         final file = _files[index] as File;
         String titleMd5 = getHash(file, Directory(widget.folderPath));
         final lastView = SharedPreferencesHelper.getInt("LASTVIEW.$titleMd5");
+        final duration = _durations[file.path];
+        final size = getFileSize(file.lengthSync());
         return ListTile(
           title: index == lastView
               ? Text(file.uri.pathSegments.last,
                   style:
                       const TextStyle(color: Color.fromARGB(255, 6, 124, 235)))
               : Text(file.uri.pathSegments.last),
-          subtitle: Text(getFileSize(file.lengthSync())),
+          subtitle: Text(
+              duration != null ? "${formatDuration(duration)}  $size" : size),
           leading:
               getFileLeading(file.uri.pathSegments.last, index, _fileCacheMap),
           onTap: () async {
@@ -109,12 +123,9 @@ class _FileListScreenState extends State<FileListScreen>
         title: Text(widget.folderPath.split('/').last),
       ),
       body: RefreshIndicator(
-        onRefresh: () => loadFiles(widget.folderPath).then((value) {
-          setState(() {
-            _files = value;
-          });
-          _cacheImage(value);
-        }),
+        onRefresh: () async {
+          await _loadFiles();
+        },
         child: _fileListView(),
       ),
     );
