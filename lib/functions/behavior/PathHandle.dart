@@ -31,6 +31,7 @@ mixin PathHandle {
         .where((entity) =>
             entity is File && !entity.path.endsWith('progress.json'))
         .toList();
+    files.sort((a, b) => a.path.compareTo(b.path));
     return files;
   }
 
