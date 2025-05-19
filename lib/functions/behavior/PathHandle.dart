@@ -36,12 +36,11 @@ mixin PathHandle {
   }
 
   Future<void> openFolder(BuildContext context, String folderPath) async {
-    final files = await loadFiles(folderPath);
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) =>
-            FileListScreen(folderPath: folderPath, files: files),
+            FileListScreen(folderPath: folderPath),
       ),
     );
   }

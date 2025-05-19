@@ -10,12 +10,10 @@ import 'package:anicat/widget/FileListScreen/getFileLeading.dart';
 
 class FileListScreen extends StatefulWidget {
   final String folderPath;
-  final List<FileSystemEntity> files;
 
   const FileListScreen({
     super.key,
     required this.folderPath,
-    required this.files,
   });
 
   @override
