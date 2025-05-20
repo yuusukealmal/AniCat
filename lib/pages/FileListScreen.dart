@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:anicat/functions/behavior/ProgressHandle.dart';
 import 'package:flutter/material.dart';
-import 'package:anicat/config/SharedPreferences.dart';
-import 'package:anicat/functions/Calc.dart';
+import 'package:anicat/functions/utils.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
@@ -83,30 +84,36 @@ class _FileListScreenState extends State<FileListScreen>
       itemCount: _files.length,
       itemBuilder: (context, index) {
         final file = _files[index] as File;
-        String titleMd5 = getHash(file, Directory(widget.folderPath));
-        final lastView = SharedPreferencesHelper.getInt("LASTVIEW.$titleMd5");
         final duration = _durations[file.path];
         final size = getFileSize(file.lengthSync());
-        return ListTile(
-          title: index == lastView
-              ? Text(file.uri.pathSegments.last,
-                  style:
-                      const TextStyle(color: Color.fromARGB(255, 6, 124, 235)))
-              : Text(file.uri.pathSegments.last),
-          subtitle: Text(
-              duration != null ? "${formatDuration(duration)}  $size" : size),
-          leading:
-              getFileLeading(file.uri.pathSegments.last, index, _fileCacheMap),
-          onTap: () async {
-            debugPrint('Tapped file: ${file.uri.pathSegments.last}');
-            await SharedPreferencesHelper.setInt("LASTVIEW.$titleMd5", index);
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => VideoPlayerScreen(filePath: file.path),
-              ),
+        return FutureBuilder<String?>(
+          future: Config.getLastView(file),
+          builder: (context, snapshot) {
+            final lastView = snapshot.data;
+            return ListTile(
+              title: lastView == getHash(file)
+                  ? Text(file.uri.pathSegments.last,
+                      style: const TextStyle(
+                          color: Color.fromARGB(255, 6, 124, 235)))
+                  : Text(file.uri.pathSegments.last),
+              subtitle: Text(duration != null
+                  ? "${formatDuration(duration)}  $size"
+                  : size),
+              leading: getFileLeading(
+                  file.uri.pathSegments.last, index, _fileCacheMap),
+              onTap: () async {
+                debugPrint('Tapped file: ${file.uri.pathSegments.last}');
+                await Config.writeLastView(file);
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        VideoPlayerScreen(filePath: file),
+                  ),
+                );
+                setState(() {});
+              },
             );
-            setState(() {});
           },
         );
       },

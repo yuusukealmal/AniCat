@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:anicat/functions/Calc.dart';
+import 'package:anicat/functions/utils.dart';
 
 class OverlayProvider extends ChangeNotifier {
   bool _isOverlayShow = false, _isVideoScreen = false, _isDownloading = false;

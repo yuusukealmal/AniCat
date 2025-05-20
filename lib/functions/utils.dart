@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 
@@ -39,4 +41,13 @@ Future<Duration> getVideoDuration(File file) async {
     debugPrint('無法讀取影片時間: $e');
   }
   return Duration.zero;
+}
+
+String getHash(File file, [Directory? folder]) {
+  String toHash = folder == null
+      ? file.uri.pathSegments.last.replaceAll(".mp4", "")
+      : folder.uri.pathSegments.last;
+  String hash = sha256.convert(utf8.encode(toHash)).toString().substring(0, 16);
+
+  return hash;
 }

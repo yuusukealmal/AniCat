@@ -1,6 +1,5 @@
 import 'dart:io';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
+import 'package:anicat/functions/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -16,16 +15,6 @@ mixin ImgCache {
     }
 
     return cachePath;
-  }
-
-  String getHash(File file, [Directory? folder]) {
-    String toHash = folder == null
-        ? file.uri.pathSegments.last.replaceAll(".mp4", "")
-        : folder.uri.pathSegments.last;
-    String hash =
-        sha256.convert(utf8.encode(toHash)).toString().substring(0, 16);
-
-    return hash;
   }
 
   Future<String> getThumbnail(File file) async {

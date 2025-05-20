@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:anicat/functions/Calc.dart';
+import 'package:anicat/functions/utils.dart';
 
 dynamic onFolderPropertiesPress(
     BuildContext context, String folderName, List files) async {

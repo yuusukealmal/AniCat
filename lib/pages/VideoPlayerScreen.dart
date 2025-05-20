@@ -6,10 +6,10 @@ import 'package:flutter_video_view/flutter_video_view.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
 import 'package:provider/provider.dart';
-import 'package:anicat/functions/behavior/ProgressWriter.dart';
+import 'package:anicat/functions/behavior/ProgressHandle.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
-  final String filePath;
+  final File filePath;
   const VideoPlayerScreen({super.key, required this.filePath});
 
   @override
@@ -32,14 +32,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     setLandscapeMode();
     Provider.of<OverlayProvider>(context, listen: false).setIsVideoScreen(true);
 
-    _videoPlayerController = VideoPlayerController.file(File(widget.filePath));
+    _videoPlayerController = VideoPlayerController.file(widget.filePath);
     _videoPlayerController!.setPlaybackSpeed(playbackSpeed);
 
     _initStartTime();
   }
 
   Future<void> _initStartTime() async {
-    final duration = await Config.readDuration(File(widget.filePath));
+    final duration = await Config.getDuration(widget.filePath);
     setState(() {
       startTime = duration;
     });
@@ -48,7 +48,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   @override
   void dispose() {
     final pauseTime = _videoPlayerController?.value.position;
-    unawaited(Config.writeDuration(File(widget.filePath), pauseTime!));
+    unawaited(Config.writeDuration(widget.filePath, pauseTime!));
     _videoPlayerController?.dispose();
     setPortraitMode();
     super.dispose();
@@ -74,7 +74,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         controller: VideoController(
           videoPlayerController: _videoPlayerController!,
           videoConfig: VideoConfig(
-            title: widget.filePath.split('/').last,
+            title: widget.filePath.uri.pathSegments.last,
             showLock: true,
             autoPlay: atuoPlay,
             fullScreenByDefault: fullScreen,
