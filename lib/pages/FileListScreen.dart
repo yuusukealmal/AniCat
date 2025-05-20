@@ -40,16 +40,21 @@ class _FileListScreenState extends State<FileListScreen>
 
   Future<void> _loadFiles() async {
     final files = await loadFiles(widget.folderPath);
-    final durations = <String, Duration?>{};
-    for (final file in files) {
-      if (file is File) {
-        durations[file.path] = await getVideoDuration(file);
-      }
-    }
     setState(() {
       _files = files;
-      _durations = durations;
+      _durations = {};
     });
+    for (final file in files) {
+      if (file is File) {
+        getVideoDuration(file).then((duration) {
+          if (mounted) {
+            setState(() {
+              _durations[file.path] = duration;
+            });
+          }
+        });
+      }
+    }
     _cacheImage(files);
   }
 
