@@ -137,28 +137,41 @@ class _MyHomePageState extends State<MyHomePage>
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          ListView.builder(
-                                            itemCount: catId.length,
-                                            shrinkWrap: true,
-                                            itemBuilder: (context, index) {
-                                              List<String> anime = catId[index]
-                                                  .map((e) => e.toString())
-                                                  .toList();
-                                              return ListTile(
-                                                title: Text(
-                                                  anime[1],
-                                                  style:
-                                                      TextStyle(fontSize: 16),
-                                                ),
-                                                subtitle: Text(
-                                                  "${anime[3]} ${anime[4]} ${anime[2]}",
-                                                  style:
-                                                      TextStyle(fontSize: 14),
-                                                ),
-                                              );
-                                            },
+                                          Padding(
+                                            padding: const EdgeInsets.all(16.0),
+                                            child: Text(
+                                              "已選擇清單",
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
                                           ),
-                                          SizedBox(height: 16),
+                                          const SizedBox(height: 8),
+                                          Expanded(
+                                            child: ListView.builder(
+                                              itemCount: catId.length,
+                                              itemBuilder: (context, index) {
+                                                List<String> anime =
+                                                    catId[index]
+                                                        .map(
+                                                            (e) => e.toString())
+                                                        .toList();
+                                                return ListTile(
+                                                  title: Text(
+                                                    anime[1],
+                                                    style:
+                                                        TextStyle(fontSize: 16),
+                                                  ),
+                                                  subtitle: Text(
+                                                    "${anime[3]} ${anime[4]} ${anime[2]}",
+                                                    style:
+                                                        TextStyle(fontSize: 14),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16),
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
