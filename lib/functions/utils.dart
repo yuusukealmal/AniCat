@@ -18,7 +18,10 @@ String getFileSize(int length) {
   return "${(length / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}";
 }
 
-String formatDuration(Duration duration) {
+String? formatDuration(Duration? duration) {
+  if (duration == null) {
+    return null;
+  }
   String twoDigits(int n) => n.toString().padLeft(2, '0');
   final minutes = twoDigits(duration.inMinutes.remainder(60));
   final seconds = twoDigits(duration.inSeconds.remainder(60));

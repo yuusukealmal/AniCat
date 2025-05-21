@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:path/path.dart' as p;
 import 'package:anicat/functions/behavior/ProgressHandle.dart';
 import 'package:flutter/material.dart';
 import 'package:anicat/functions/utils.dart';
@@ -96,19 +97,20 @@ class _FileListScreenState extends State<FileListScreen>
                       style: const TextStyle(
                           color: Color.fromARGB(255, 6, 124, 235)))
                   : Text(file.uri.pathSegments.last),
-              subtitle: Text(duration != null
-                  ? "${formatDuration(duration)}  $size"
-                  : size),
+              subtitle: Text(size),
               leading: getFileLeading(
-                  file.uri.pathSegments.last, index, _fileCacheMap),
+                p.extension(file.uri.pathSegments.last),
+                index,
+                _fileCacheMap,
+                formatDuration(duration),
+              ),
               onTap: () async {
                 debugPrint('Tapped file: ${file.uri.pathSegments.last}');
                 await Config.writeLastView(file);
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        VideoPlayerScreen(filePath: file),
+                    builder: (context) => VideoPlayerScreen(filePath: file),
                   ),
                 );
                 setState(() {});
