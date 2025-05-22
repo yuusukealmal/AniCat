@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart';
 import 'package:anicat/functions/behavior/ProgressHandle.dart';
 import 'package:flutter/material.dart';
 import 'package:anicat/functions/utils.dart';
@@ -99,7 +99,7 @@ class _FileListScreenState extends State<FileListScreen>
                   : Text(file.uri.pathSegments.last),
               subtitle: Text(size),
               leading: getFileLeading(
-                p.extension(file.uri.pathSegments.last),
+                extension(file.uri.pathSegments.last),
                 index,
                 _fileCacheMap,
                 formatDuration(duration),
