@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
+
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/config/notifier/HomeColorProvider.dart';
 import 'package:anicat/config/notifier/ThemeProvider.dart';
 
-Future<dynamic> onResetSharedPreferences(BuildContext context) async {
+Future<void> onResetSharedPreferences(BuildContext context) async {
   showDialog(
     context: context,
     builder: (BuildContext context) {

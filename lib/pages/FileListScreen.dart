@@ -1,9 +1,11 @@
-import 'dart:async';
 import 'dart:io';
-import 'package:path/path.dart';
-import 'package:anicat/functions/behavior/ProgressHandle.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
+
+import 'package:path/path.dart';
+
 import 'package:anicat/functions/utils.dart';
+import 'package:anicat/functions/behavior/ProgressHandle.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
@@ -93,9 +95,12 @@ class _FileListScreenState extends State<FileListScreen>
             final lastView = snapshot.data;
             return ListTile(
               title: lastView == getHash(file)
-                  ? Text(file.uri.pathSegments.last,
+                  ? Text(
+                      file.uri.pathSegments.last,
                       style: const TextStyle(
-                          color: Color.fromARGB(255, 6, 124, 235)))
+                        color: Color.fromARGB(255, 6, 124, 235),
+                      ),
+                    )
                   : Text(file.uri.pathSegments.last),
               subtitle: Text(size),
               leading: getFileLeading(
@@ -128,10 +133,13 @@ class _FileListScreenState extends State<FileListScreen>
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.keyboard_backspace_sharp)),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(
+            Icons.keyboard_backspace_sharp,
+          ),
+        ),
         title: Text(widget.folderPath.split('/').last),
       ),
       body: RefreshIndicator(

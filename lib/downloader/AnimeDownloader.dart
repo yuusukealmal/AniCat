@@ -2,12 +2,14 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
-import 'package:anicat/config/notifier/OverlayProvider.dart';
+
 import 'package:anicat/downloader/CookieHandle.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
+import 'package:anicat/config/notifier/OverlayProvider.dart';
 
 class Anime {
   String folder;

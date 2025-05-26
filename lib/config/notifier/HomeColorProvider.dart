@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:anicat/config/SharedPreferences.dart';
 
 class ColorProvider with ChangeNotifier {

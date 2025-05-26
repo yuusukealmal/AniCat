@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
+
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/config/notifier/HomeColorProvider.dart';
 import 'package:anicat/config/notifier/ThemeProvider.dart';
@@ -36,20 +38,22 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final color = Provider.of<ColorProvider>(context);
+    final colorProvider = Provider.of<ColorProvider>(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
       title: "AniCat Downloader",
       theme: ThemeData.light().copyWith(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: color.color ?? const Color.fromARGB(255, 183, 58, 156),
+          seedColor:
+              colorProvider.color ?? const Color.fromARGB(255, 183, 58, 156),
         ),
         useMaterial3: true,
       ),
       darkTheme: ThemeData.dark().copyWith(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: color.color ?? const Color.fromARGB(255, 183, 58, 156),
+          seedColor:
+              colorProvider.color ?? const Color.fromARGB(255, 183, 58, 156),
           brightness: Brightness.dark,
         ),
         useMaterial3: true,

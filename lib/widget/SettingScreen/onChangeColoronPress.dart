@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
 import 'package:anicat/config/notifier/HomeColorProvider.dart';
 
-Future<dynamic> onChangeColoronPress(BuildContext context, int? selectedColor) {
+Future<void> onChangeColoronPress(BuildContext context, int? selectedColor) {
   return showDialog(
     context: context,
     builder: (BuildContext context) {

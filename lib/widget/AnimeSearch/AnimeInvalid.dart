@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-dynamic animeInvalidDialog(BuildContext context) {
+Future<void> animeInvalidDialog(BuildContext context) {
   return showDialog(
     context: context,
     builder: (BuildContext context) {

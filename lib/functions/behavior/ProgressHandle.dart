@@ -1,7 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:anicat/functions/utils.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+
+import 'package:anicat/functions/utils.dart';
 
 class Config {
   static Future<Map<String, dynamic>> _readProgress(File file) async {

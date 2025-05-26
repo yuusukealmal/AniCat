@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+
 import 'package:intl/intl.dart';
+
 import 'package:anicat/functions/utils.dart';
 
-dynamic onFolderPropertiesPress(
+Future<void> onFolderPropertiesPress(
     BuildContext context, String folderName, List files) async {
   return showDialog(
     context: context,

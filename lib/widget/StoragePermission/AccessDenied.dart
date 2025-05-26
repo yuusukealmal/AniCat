@@ -1,9 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 
-import 'package:anicat/functions/behavior/ImgCache.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-Future<void> onClearCache(BuildContext context) async {
+Future<void> askManageStoragePermission(BuildContext context) async {
   return showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -19,7 +18,7 @@ Future<void> onClearCache(BuildContext context) async {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Clear Cache",
+                  "Access Denied",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
@@ -27,29 +26,25 @@ Future<void> onClearCache(BuildContext context) async {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Are you sure you want to clear cache?",
+                  "Please enable storage access in settings.",
                 ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () async {
+                        await Permission.manageExternalStorage.request();
+                      },
                       child: const Text(
-                        "Cancel",
+                        "Open Settings",
                       ),
                     ),
                     const SizedBox(width: 8),
                     TextButton(
-                      onPressed: () async {
-                        final cache = await ImgCache.getImgCacheFolder();
-                        await for (FileSystemEntity entity in cache.list()) {
-                          await entity.delete(recursive: true);
-                        }
-                        Navigator.of(context).pop();
-                      },
+                      onPressed: () => Navigator.of(context).pop(),
                       child: const Text(
-                        "Clear",
+                        "Cancel",
                         style: TextStyle(color: Colors.red),
                       ),
                     ),

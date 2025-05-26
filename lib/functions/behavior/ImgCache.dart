@@ -1,8 +1,10 @@
 import 'dart:io';
-import 'package:anicat/functions/utils.dart';
 import 'package:flutter/foundation.dart';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
+
+import 'package:anicat/functions/utils.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
 

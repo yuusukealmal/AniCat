@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-dynamic onFolderDeletePress(
+Future<void> onFolderDeletePress(
     BuildContext context, String folderPath, List<FileSystemEntity> files) {
   return showDialog(
     context: context,

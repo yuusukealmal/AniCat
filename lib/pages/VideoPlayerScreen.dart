@@ -1,11 +1,13 @@
-import 'dart:async';
 import 'dart:io';
-import 'package:anicat/config/notifier/OverlayProvider.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
+
+import 'package:provider/provider.dart';
 import 'package:flutter_video_view/flutter_video_view.dart';
+
+import 'package:anicat/config/notifier/OverlayProvider.dart';
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/functions/behavior/ScreenRotate.dart';
-import 'package:provider/provider.dart';
 import 'package:anicat/functions/behavior/ProgressHandle.dart';
 
 class VideoPlayerScreen extends StatefulWidget {

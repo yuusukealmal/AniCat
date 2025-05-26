@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:anicat/config/SharedPreferences.dart';
 import 'package:anicat/config/StoragePermission.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
@@ -31,16 +32,6 @@ class _SettingScreenState extends State<SettingScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Settings"),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          icon: const Icon(Icons.keyboard_backspace_sharp),
-        ),
-      ),
       body: RefreshIndicator(
         onRefresh: () => Future.value(),
         child: ListView(
@@ -80,7 +71,9 @@ class _SettingScreenState extends State<SettingScreen>
                             String? path = await checkPermission(context);
                             if (path != null) {
                               await SharedPreferencesHelper.setString(
-                                  "Anime.DownloadPath", path);
+                                "Anime.DownloadPath",
+                                path,
+                              );
                               setState(() {});
                             }
                           },
@@ -108,77 +101,88 @@ class _SettingScreenState extends State<SettingScreen>
               ],
             ),
             ExpansionTile(
-                title: Text("Video Settings"),
-                initiallyExpanded: true,
-                children: [
-                  StatefulBuilder(
-                    builder: (context, setState) {
-                      return Column(
-                        children: [
-                          ListTile(
-                            title: const Text("Auto Play"),
-                            trailing: Switch(
-                              value: autoPlay ?? false,
-                              onChanged: (value) async {
+              title: Text("Video Settings"),
+              initiallyExpanded: true,
+              children: [
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    return Column(
+                      children: [
+                        ListTile(
+                          title: const Text("Auto Play"),
+                          trailing: Switch(
+                            value: autoPlay ?? false,
+                            onChanged: (value) async {
+                              await SharedPreferencesHelper.setBool(
+                                  "Video.AutoPlay", value);
+                              if (!value) {
                                 await SharedPreferencesHelper.setBool(
-                                    "Video.AutoPlay", value);
-                                if (!value) {
-                                  await SharedPreferencesHelper.setBool(
-                                      "Video.FullScreen", false);
-                                  fullScreen = false;
-                                }
-                                setState(() {
-                                  autoPlay = value;
-                                });
-                              },
-                            ),
+                                    "Video.FullScreen", false);
+                                fullScreen = false;
+                              }
+                              setState(() {
+                                autoPlay = value;
+                              });
+                            },
                           ),
-                          ListTile(
-                            title: const Text("Fullscreen by Default"),
-                            trailing: Switch(
-                              value: fullScreen ?? false,
-                              onChanged: autoPlay == true
-                                  ? (value) async {
-                                      await SharedPreferencesHelper.setBool(
-                                          "Video.FullScreen", value);
-                                      setState(() {
-                                        fullScreen = value;
-                                      });
-                                    }
-                                  : null,
-                            ),
+                        ),
+                        ListTile(
+                          title: const Text("Fullscreen by Default"),
+                          trailing: Switch(
+                            value: fullScreen ?? false,
+                            onChanged: autoPlay == true
+                                ? (value) async {
+                                    await SharedPreferencesHelper.setBool(
+                                        "Video.FullScreen", value);
+                                    setState(() {
+                                      fullScreen = value;
+                                    });
+                                  }
+                                : null,
                           ),
-                          ListTile(
-                            title: const Text("Playback Speed"),
-                            trailing: DropdownButton<double>(
-                              value: playbackSpeed ?? 1.0,
-                              items: const [
-                                DropdownMenuItem(
-                                    value: 0.5, child: Text("0.5x")),
-                                DropdownMenuItem(
-                                    value: 1.0, child: Text("1.0x")),
-                                DropdownMenuItem(
-                                    value: 1.5, child: Text("1.5x")),
-                                DropdownMenuItem(
-                                    value: 2.0, child: Text("2.0x")),
-                                DropdownMenuItem(
-                                    value: 4.0, child: Text("4.0x")),
-                              ],
-                              onChanged: (value) async {
-                                final speed = value ?? 1.0;
-                                await SharedPreferencesHelper.setDouble(
-                                    "Video.PlaybackSpeed", speed);
-                                setState(() {
-                                  playbackSpeed = speed;
-                                });
-                              },
-                            ),
+                        ),
+                        ListTile(
+                          title: const Text("Playback Speed"),
+                          trailing: DropdownButton<double>(
+                            value: playbackSpeed ?? 1.0,
+                            items: const [
+                              DropdownMenuItem(
+                                value: 0.5,
+                                child: Text("0.5x"),
+                              ),
+                              DropdownMenuItem(
+                                value: 1.0,
+                                child: Text("1.0x"),
+                              ),
+                              DropdownMenuItem(
+                                value: 1.5,
+                                child: Text("1.5x"),
+                              ),
+                              DropdownMenuItem(
+                                value: 2.0,
+                                child: Text("2.0x"),
+                              ),
+                              DropdownMenuItem(
+                                value: 4.0,
+                                child: Text("4.0x"),
+                              ),
+                            ],
+                            onChanged: (value) async {
+                              final speed = value ?? 1.0;
+                              await SharedPreferencesHelper.setDouble(
+                                  "Video.PlaybackSpeed", speed);
+                              setState(() {
+                                playbackSpeed = speed;
+                              });
+                            },
                           ),
-                        ],
-                      );
-                    },
-                  ),
-                ])
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            )
           ],
         ),
       ),
