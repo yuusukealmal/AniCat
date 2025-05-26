@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:anicat/pages/MyHomePage.dart';
 import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/functions/behavior/PathHandle.dart';
 import 'package:anicat/widget/MyHomePage/onDeletePress.dart';
@@ -10,38 +9,20 @@ class AnimeList extends StatefulWidget {
   const AnimeList({super.key});
 
   @override
-  State<AnimeList> createState() => _AnimeList();
+  AnimeListState createState() => AnimeListState();
 }
 
-class _AnimeList extends State<AnimeList>
-    with RouteAware, PathHandle, ImgCache {
+class AnimeListState extends State<AnimeList> with PathHandle, ImgCache {
   List<String> folders = [];
 
   @override
   void initState() {
     super.initState();
-    _loadFolders();
+    loadFolders();
   }
 
-  @override
-  void dispose() {
-    routeObserver.unsubscribe(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
-  }
-
-  @override
-  void didPopNext() {
-    _loadFolders();
-  }
-
-  Future<void> _loadFolders() async {
-    List<String> folderList = await loadFolders();
+  Future<void> loadFolders() async {
+    List<String> folderList = await loadStorageFolders();
     setState(() {
       folders = folderList;
     });
@@ -51,14 +32,14 @@ class _AnimeList extends State<AnimeList>
   Widget build(BuildContext context) {
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: _loadFolders,
+        onRefresh: loadFolders,
         child: ListView.builder(
           itemCount: folders.length,
           itemBuilder: (context, index) {
             final folderPath = folders[index];
             final folderName = folderPath.split('/').last;
             return FutureBuilder(
-              future: loadFiles(folderPath),
+              future: loadFolderFiles(folderPath),
               builder: (context, snapshot) {
                 final files = snapshot.data;
                 if (files == null || files.isEmpty) {
@@ -69,7 +50,7 @@ class _AnimeList extends State<AnimeList>
                     title: Text(folderName),
                     subtitle: Text("${files.length} Files"),
                     leading: const Icon(Icons.folder),
-                    onTap: () => openFolder(context, folderPath),
+                    onTap: () => openAnimeFolder(context, folderPath),
                   ),
                   onLongPressStart: (details) {
                     final Offset position = details.globalPosition;
@@ -98,11 +79,11 @@ class _AnimeList extends State<AnimeList>
                         ),
                       ],
                     ).then(
-                      (value) {
+                      (value) async {
                         if (value == 'properties') {
                           onFolderPropertiesPress(context, folderName, files);
                         } else if (value == 'delete') {
-                          onFolderDeletePress(context, folderPath, files);
+                          await onFolderDeletePress(context, folderPath, files);
                           setState(() {});
                         }
                       },

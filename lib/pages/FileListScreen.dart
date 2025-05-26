@@ -43,7 +43,7 @@ class _FileListScreenState extends State<FileListScreen>
   }
 
   Future<void> _loadFiles() async {
-    final files = await loadFiles(widget.folderPath);
+    final files = await loadFolderFiles(widget.folderPath);
     setState(() {
       _files = files;
       _durations = {};

@@ -21,15 +21,26 @@ final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 class _MyHomePageState extends State<MyHomePage> {
   int _index = 0;
 
-  static const List<Widget> _pagesList = <Widget>[
-    AnimeList(),
-    AnimeSearch(),
-    SettingScreen()
-  ];
+  final GlobalKey<AnimeListState> _animeListKey = GlobalKey<AnimeListState>();
+
+  late final List<Widget> _pagesList;
+
+  @override
+  void initState() {
+    super.initState();
+    _pagesList = [
+      AnimeList(key: _animeListKey),
+      AnimeSearch(),
+      SettingScreen(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _index = index;
+      if (_index == 0) {
+        _animeListKey.currentState?.loadFolders();
+      }
     });
   }
 

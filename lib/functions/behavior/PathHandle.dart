@@ -13,7 +13,7 @@ mixin PathHandle {
     return Directory(path);
   }
 
-  Future<List<String>> loadFolders() async {
+  Future<List<String>> loadStorageFolders() async {
     debugPrint("Loading Folders");
     final directory = await PathHandle.getDownloadPath();
 
@@ -26,7 +26,7 @@ mixin PathHandle {
     return folderList;
   }
 
-  Future<List<FileSystemEntity>> loadFiles(String folderPath) async {
+  Future<List<FileSystemEntity>> loadFolderFiles(String folderPath) async {
     final directory = Directory(folderPath);
     List<FileSystemEntity> files = await directory
         .list()
@@ -37,7 +37,7 @@ mixin PathHandle {
     return files;
   }
 
-  Future<void> openFolder(BuildContext context, String folderPath) async {
+  Future<void> openAnimeFolder(BuildContext context, String folderPath) async {
     Navigator.push(
       context,
       MaterialPageRoute(
