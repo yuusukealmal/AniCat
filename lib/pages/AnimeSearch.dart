@@ -134,45 +134,54 @@ class _AnimeSearch extends State<AnimeSearch> with ImgCache {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      List<String> finalSelectedAnimes = selectedAnimes.isNotEmpty
-                          ? selectedAnimes
-                              .map((anime) =>
-                                  "https://anime1.me/?cat=${anime.id}")
-                              .toList()
-                          : [_textController.text];
-                      context.read<OverlayProvider>().setIsDownloading(true);
-                      for (String inputUrl in finalSelectedAnimes) {
-                        await parse(inputUrl).then((urls) async {
-                          if (urls.isEmpty) {
-                            if (mounted) {
-                              animeInvalidDialog(context);
-                            }
-                          }
-                          urls = urls.reversed.toList();
-                          String folder = urls.removeAt(0);
-                          for (String url in urls) {
-                            MP4 anime = MP4(folder: folder, url: url);
-                            await anime.init();
-                            debugPrint("Get Started for ${anime.title}");
-
-                            double _progress = 0.0;
-
-                            anime.progressStream.listen((progress) async {
-                              _progress = progress;
-
-                              if (_progress >= 1.0) {
-                                debugPrint("Download Completed");
-                                await checkCache(folder, anime);
+                      if (context.read<OverlayProvider>().isDownloading) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("正在下載中，請等待下載完"),
+                          ),
+                        );
+                      } else {
+                        List<String> finalSelectedAnimes =
+                            selectedAnimes.isNotEmpty
+                                ? selectedAnimes
+                                    .map((anime) =>
+                                        "https://anime1.me/?cat=${anime.id}")
+                                    .toList()
+                                : [_textController.text];
+                        context.read<OverlayProvider>().setIsDownloading(true);
+                        for (String inputUrl in finalSelectedAnimes) {
+                          await parse(inputUrl).then((urls) async {
+                            if (urls.isEmpty) {
+                              if (mounted) {
+                                animeInvalidDialog(context);
                               }
-                            });
-                            await anime.download(super.context);
-                          }
-                          debugPrint("Download Completed");
-                        }).catchError((error) {
-                          debugPrint("Error: $error");
-                        });
+                            }
+                            urls = urls.reversed.toList();
+                            String folder = urls.removeAt(0);
+                            for (String url in urls) {
+                              MP4 anime = MP4(folder: folder, url: url);
+                              await anime.init();
+                              debugPrint("Get Started for ${anime.title}");
+
+                              double _progress = 0.0;
+
+                              anime.progressStream.listen((progress) async {
+                                _progress = progress;
+
+                                if (_progress >= 1.0) {
+                                  debugPrint("Download Completed");
+                                  await checkCache(folder, anime);
+                                }
+                              });
+                              await anime.download(super.context);
+                            }
+                            debugPrint("Download Completed");
+                          }).catchError((error) {
+                            debugPrint("Error: $error");
+                          });
+                        }
+                        context.read<OverlayProvider>().setIsDownloading(false);
                       }
-                      context.read<OverlayProvider>().setIsDownloading(false);
                     },
                     child: const Text('開始下載'),
                   ),
