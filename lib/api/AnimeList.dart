@@ -24,13 +24,21 @@ class AnimeValue {
     }
     return AnimeValue(
       id: data[0],
-      name: data[1].toString(),
+      name: data[1],
       status: data[2],
       year: data[3],
       season: data[4],
       translate: data[5],
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AnimeValue && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }
 
 Future<List<AnimeValue>> getAnimeList() async {

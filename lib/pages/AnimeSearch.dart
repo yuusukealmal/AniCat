@@ -119,6 +119,14 @@ class _AnimeSearch extends State<AnimeSearch> with ImgCache {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   TextButton(
+                    onPressed: () async {
+                      if (!context.read<OverlayProvider>().isDownloading) {
+                        await _getManifest();
+                      }
+                    },
+                    child: const Text("重新取得動漫"),
+                  ),
+                  TextButton(
                     child: const Text('顯示已選取'),
                     onPressed: () {
                       if (selectedAnimes.isNotEmpty) {
@@ -137,7 +145,7 @@ class _AnimeSearch extends State<AnimeSearch> with ImgCache {
                       if (context.read<OverlayProvider>().isDownloading) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text("正在下載中，請等待下載完"),
+                            content: Text("正在下載中，請等待下載完再嘗試"),
                           ),
                         );
                       } else {
