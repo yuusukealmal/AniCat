@@ -110,48 +110,28 @@ class MP4 extends Anime with PathHandle {
 
       final sink = file.openWrite(mode: FileMode.append);
       overlayProvider.showOverlay(context, title: title, length: _length);
-      await response.stream.listen((chunk) {
-        _downloaded += chunk.length;
-        sink.add(chunk);
-        double progress = _downloaded / _length;
-        progressController.add(progress);
-        overlayProvider.updateOverlayIfNeeded(
-            progress: progress, downloaded: _downloaded);
-        if (_downloaded == _length) {
-          debugPrint("Download Finished for $title with force");
-          progressController.close();
-          overlayProvider.removeOverlay();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Download Finished $title"),
-              duration: Duration(seconds: 1),
-            ),
-          );
-        }
-      }, onDone: () async {
-        debugPrint("Download Finished for $title with onDone");
-        await sink.close();
-        progressController.close();
-        overlayProvider.removeOverlay();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Download Finished $title"),
-            duration: Duration(seconds: 1),
-          ),
-        );
-      }, onError: (error) {
-        debugPrint("Download Failed for $title, Cause by $error");
-        progressController.close();
-        sink.close();
-        overlayProvider.removeOverlay();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Download Failed $title, Cause by $error"),
-            duration: Duration(seconds: 1),
-          ),
-        );
-        throw error;
-      }, cancelOnError: true).asFuture();
+      await response.stream.listen(
+        (chunk) {
+          _downloaded += chunk.length;
+          sink.add(chunk);
+          double progress = _downloaded / _length;
+          progressController.add(progress);
+          overlayProvider.updateOverlayIfNeeded(
+              progress: progress, downloaded: _downloaded);
+          if (_downloaded == _length) {
+            debugPrint("Download Finished for $title with force");
+            progressController.close();
+            overlayProvider.removeOverlay();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Download Finished $title"),
+                duration: Duration(seconds: 1),
+              ),
+            );
+          }
+        },
+        cancelOnError: true,
+      ).asFuture();
     } catch (e) {
       debugPrint("Fail to Download $title, Cause by $e");
       overlayProvider.removeOverlay();
