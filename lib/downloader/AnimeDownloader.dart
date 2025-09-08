@@ -65,7 +65,7 @@ class MP4 extends Anime with PathHandle {
 
   Future<Directory> getPath() async {
     final root = await PathHandle.getDownloadPath();
-    Directory f = Directory('${root.path}/$folder');
+    Directory f = Directory('${root.path}/${folder.replaceAll("/", " ")}');
     if (!await f.exists()) {
       await f.create(recursive: true);
       await File('${f.path}/progress.json').create(recursive: true);
@@ -82,7 +82,7 @@ class MP4 extends Anime with PathHandle {
       request.headers.addAll(headers);
 
       Directory root = await getPath();
-      final file = File('${root.path}/$title.mp4');
+      final file = File('${root.path}/${title!.replaceAll("/", " ")}.mp4');
 
       if (file.existsSync()) {
         int fileLength = file.lengthSync();
