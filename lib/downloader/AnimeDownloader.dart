@@ -41,11 +41,12 @@ class Anime {
     realUrl += json['s'][index]['src'];
 
     String set = response.headers['set-cookie']!;
-    String? e = RegExp(r"e=(.*?);").firstMatch(set)!.group(1);
-    String? p = RegExp(r"p=(.*?);").firstMatch(set)!.group(1);
-    String? h = RegExp(r"HttpOnly,h=(.*?);").firstMatch(set)!.group(1);
+    String cookie = RegExp(r"\b([eph])=([^;,\s][^;,\s]*)")
+        .allMatches(set)
+        .map((e) => e.group(0))
+        .join(";");
 
-    headers["cookie"] = "e=$e;p=$p;h=$h;";
+    headers["cookie"] = cookie;
   }
 
   Future<void> init() async {
