@@ -7,10 +7,15 @@ import '../../frb_generated.dart';
 import '../config/header.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<String> httpGet(
-        {required String url, HeaderMap? header, Value? query}) =>
-    RustLib.instance.api
-        .crateApiHttpBaseHttpGet(url: url, header: header, query: query);
+Future<String> httpGet({
+  required String url,
+  HeaderMap? header,
+  Value? query,
+}) => RustLib.instance.api.crateApiHttpBaseHttpGet(
+  url: url,
+  header: header,
+  query: query,
+);
 
 Future<String> httpPost({required String url, required Value body}) =>
     RustLib.instance.api.crateApiHttpBaseHttpPost(url: url, body: body);

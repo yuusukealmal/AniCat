@@ -9,7 +9,10 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 Future<String> getAnimeTitle({required String url}) =>
     RustLib.instance.api.crateApiUtilsAnimeFetchGetAnimeTitle(url: url);
 
-Future<(bool, String, List<String>)> getAnimeEpisode(
-        {required String url, required int index}) =>
-    RustLib.instance.api
-        .crateApiUtilsAnimeFetchGetAnimeEpisode(url: url, index: index);
+Future<(bool, String, List<String>)> getAnimeEpisode({
+  required String url,
+  required int index,
+}) => RustLib.instance.api.crateApiUtilsAnimeFetchGetAnimeEpisode(
+  url: url,
+  index: index,
+);

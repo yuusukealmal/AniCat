@@ -39,12 +39,8 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   /// Initialize flutter_rust_bridge in mock mode.
   /// No libraries for FFI are loaded.
-  static void initMock({
-    required RustLibApi api,
-  }) {
-    instance.initMockImpl(
-      api: api,
-    );
+  static void initMock({required RustLibApi api}) {
+    instance.initMockImpl(api: api);
   }
 
   /// Dispose flutter_rust_bridge
@@ -76,18 +72,23 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
-    stem: 'rust_lib_anicat',
-    ioDirectory: 'rust/target/release/',
-    webPrefix: 'pkg/',
-  );
+        stem: 'rust_lib_anicat',
+        ioDirectory: 'rust/target/release/',
+        webPrefix: 'pkg/',
+      );
 }
 
 abstract class RustLibApi extends BaseApi {
-  Future<String> crateApiConfigErrErrMsg(
-      {required String url, required int code, required String msg});
+  Future<String> crateApiConfigErrErrMsg({
+    required String url,
+    required int code,
+    required String msg,
+  });
 
-  Future<(bool, String, List<String>)> crateApiUtilsAnimeFetchGetAnimeEpisode(
-      {required String url, required int index});
+  Future<(bool, String, List<String>)> crateApiUtilsAnimeFetchGetAnimeEpisode({
+    required String url,
+    required int index,
+  });
 
   Future<String> crateApiHttpInterfaceGetAnimeList();
 
@@ -97,20 +98,26 @@ abstract class RustLibApi extends BaseApi {
 
   Future<HeaderMap?> crateApiConfigHeaderGetHeaderCookies();
 
-  Future<String> crateApiHttpBaseHttpGet(
-      {required String url, HeaderMap? header, Value? query});
+  Future<String> crateApiHttpBaseHttpGet({
+    required String url,
+    HeaderMap? header,
+    Value? query,
+  });
 
-  Future<String> crateApiHttpBaseHttpPost(
-      {required String url, required Value body});
+  Future<String> crateApiHttpBaseHttpPost({
+    required String url,
+    required Value body,
+  });
 
-  Future<(String, List<String>)> crateApiHttpInterfaceParseAnimeUrl(
-      {required String url});
+  Future<(String, List<String>)> crateApiHttpInterfaceParseAnimeUrl({
+    required String url,
+  });
 
   RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_HeaderMap;
+  get rust_arc_increment_strong_count_HeaderMap;
 
   RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_HeaderMap;
+  get rust_arc_decrement_strong_count_HeaderMap;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_HeaderMapPtr;
 
@@ -130,51 +137,68 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Future<String> crateApiConfigErrErrMsg(
-      {required String url, required int code, required String msg}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(url, serializer);
-        sse_encode_u_16(code, serializer);
-        sse_encode_String(msg, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 1, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_String,
-        decodeErrorData: null,
+  Future<String> crateApiConfigErrErrMsg({
+    required String url,
+    required int code,
+    required String msg,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(url, serializer);
+          sse_encode_u_16(code, serializer);
+          sse_encode_String(msg, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 1,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiConfigErrErrMsgConstMeta,
+        argValues: [url, code, msg],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiConfigErrErrMsgConstMeta,
-      argValues: [url, code, msg],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiConfigErrErrMsgConstMeta => const TaskConstMeta(
-        debugName: "err_msg",
-        argNames: ["url", "code", "msg"],
-      );
+    debugName: "err_msg",
+    argNames: ["url", "code", "msg"],
+  );
 
   @override
-  Future<(bool, String, List<String>)> crateApiUtilsAnimeFetchGetAnimeEpisode(
-      {required String url, required int index}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(url, serializer);
-        sse_encode_u_32(index, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 2, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_record_bool_string_list_string,
-        decodeErrorData: sse_decode_String,
+  Future<(bool, String, List<String>)> crateApiUtilsAnimeFetchGetAnimeEpisode({
+    required String url,
+    required int index,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(url, serializer);
+          sse_encode_u_32(index, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 2,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_record_bool_string_list_string,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiUtilsAnimeFetchGetAnimeEpisodeConstMeta,
+        argValues: [url, index],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiUtilsAnimeFetchGetAnimeEpisodeConstMeta,
-      argValues: [url, index],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiUtilsAnimeFetchGetAnimeEpisodeConstMeta =>
@@ -185,227 +209,270 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<String> crateApiHttpInterfaceGetAnimeList() {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 3, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_String,
-        decodeErrorData: sse_decode_String,
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 3,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiHttpInterfaceGetAnimeListConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiHttpInterfaceGetAnimeListConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiHttpInterfaceGetAnimeListConstMeta =>
-      const TaskConstMeta(
-        debugName: "get_anime_list",
-        argNames: [],
-      );
+      const TaskConstMeta(debugName: "get_anime_list", argNames: []);
 
   @override
   Future<String> crateApiUtilsAnimeFetchGetAnimeTitle({required String url}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(url, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 4, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_String,
-        decodeErrorData: sse_decode_String,
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(url, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 4,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiUtilsAnimeFetchGetAnimeTitleConstMeta,
+        argValues: [url],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiUtilsAnimeFetchGetAnimeTitleConstMeta,
-      argValues: [url],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiUtilsAnimeFetchGetAnimeTitleConstMeta =>
-      const TaskConstMeta(
-        debugName: "get_anime_title",
-        argNames: ["url"],
-      );
+      const TaskConstMeta(debugName: "get_anime_title", argNames: ["url"]);
 
   @override
   Future<HeaderMap?> crateApiConfigHeaderGetHeader() {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 5, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap,
-        decodeErrorData: null,
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 5,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiConfigHeaderGetHeaderConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiConfigHeaderGetHeaderConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiConfigHeaderGetHeaderConstMeta =>
-      const TaskConstMeta(
-        debugName: "get_header",
-        argNames: [],
-      );
+      const TaskConstMeta(debugName: "get_header", argNames: []);
 
   @override
   Future<HeaderMap?> crateApiConfigHeaderGetHeaderCookies() {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 6, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap,
-        decodeErrorData: null,
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 6,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiConfigHeaderGetHeaderCookiesConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiConfigHeaderGetHeaderCookiesConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiConfigHeaderGetHeaderCookiesConstMeta =>
-      const TaskConstMeta(
-        debugName: "get_header_cookies",
-        argNames: [],
-      );
+      const TaskConstMeta(debugName: "get_header_cookies", argNames: []);
 
   @override
-  Future<String> crateApiHttpBaseHttpGet(
-      {required String url, HeaderMap? header, Value? query}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(url, serializer);
-        sse_encode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-            header, serializer);
-        sse_encode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-            query, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 7, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_String,
-        decodeErrorData: sse_decode_String,
+  Future<String> crateApiHttpBaseHttpGet({
+    required String url,
+    HeaderMap? header,
+    Value? query,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(url, serializer);
+          sse_encode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+            header,
+            serializer,
+          );
+          sse_encode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+            query,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 7,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiHttpBaseHttpGetConstMeta,
+        argValues: [url, header, query],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiHttpBaseHttpGetConstMeta,
-      argValues: [url, header, query],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiHttpBaseHttpGetConstMeta => const TaskConstMeta(
-        debugName: "http_get",
-        argNames: ["url", "header", "query"],
-      );
+    debugName: "http_get",
+    argNames: ["url", "header", "query"],
+  );
 
   @override
-  Future<String> crateApiHttpBaseHttpPost(
-      {required String url, required Value body}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(url, serializer);
-        sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-            body, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 8, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_String,
-        decodeErrorData: sse_decode_String,
+  Future<String> crateApiHttpBaseHttpPost({
+    required String url,
+    required Value body,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(url, serializer);
+          sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+            body,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 8,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiHttpBaseHttpPostConstMeta,
+        argValues: [url, body],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiHttpBaseHttpPostConstMeta,
-      argValues: [url, body],
-      apiImpl: this,
-    ));
+    );
   }
 
-  TaskConstMeta get kCrateApiHttpBaseHttpPostConstMeta => const TaskConstMeta(
-        debugName: "http_post",
-        argNames: ["url", "body"],
-      );
+  TaskConstMeta get kCrateApiHttpBaseHttpPostConstMeta =>
+      const TaskConstMeta(debugName: "http_post", argNames: ["url", "body"]);
 
   @override
-  Future<(String, List<String>)> crateApiHttpInterfaceParseAnimeUrl(
-      {required String url}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(url, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 9, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_record_string_list_string,
-        decodeErrorData: sse_decode_String,
+  Future<(String, List<String>)> crateApiHttpInterfaceParseAnimeUrl({
+    required String url,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(url, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 9,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_record_string_list_string,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiHttpInterfaceParseAnimeUrlConstMeta,
+        argValues: [url],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiHttpInterfaceParseAnimeUrlConstMeta,
-      argValues: [url],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiHttpInterfaceParseAnimeUrlConstMeta =>
-      const TaskConstMeta(
-        debugName: "parse_anime_url",
-        argNames: ["url"],
-      );
+      const TaskConstMeta(debugName: "parse_anime_url", argNames: ["url"]);
 
   RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_HeaderMap => wire
-          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap;
+  get rust_arc_increment_strong_count_HeaderMap => wire
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap;
 
   RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_HeaderMap => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap;
+  get rust_arc_decrement_strong_count_HeaderMap => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap;
 
-  RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_Value =>
-      wire.rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue;
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_Value => wire
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue;
 
-  RustArcDecrementStrongCountFnType get rust_arc_decrement_strong_count_Value =>
-      wire.rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue;
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_Value => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue;
 
   @protected
   HeaderMap
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          dynamic raw) {
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return HeaderMapImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   Value
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          dynamic raw) {
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ValueImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   HeaderMap
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          dynamic raw) {
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return HeaderMapImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   Value
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          dynamic raw) {
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ValueImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -424,20 +491,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   HeaderMap
-      dco_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          dynamic raw) {
+  dco_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-        raw);
+      raw,
+    );
   }
 
   @protected
   Value
-      dco_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          dynamic raw) {
+  dco_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-        raw);
+      raw,
+    );
   }
 
   @protected
@@ -454,29 +525,34 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   HeaderMap?
-      dco_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          dynamic raw) {
+  dco_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null
         ? null
         : dco_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-            raw);
+            raw,
+          );
   }
 
   @protected
   Value?
-      dco_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          dynamic raw) {
+  dco_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null
         ? null
         : dco_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-            raw);
+            raw,
+          );
   }
 
   @protected
   (bool, String, List<String>) dco_decode_record_bool_string_list_string(
-      dynamic raw) {
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
     if (arr.length != 3) {
@@ -496,10 +572,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     if (arr.length != 2) {
       throw Exception('Expected 2 elements, got ${arr.length}');
     }
-    return (
-      dco_decode_String(arr[0]),
-      dco_decode_list_String(arr[1]),
-    );
+    return (dco_decode_String(arr[0]), dco_decode_list_String(arr[1]));
   }
 
   @protected
@@ -534,38 +607,50 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   HeaderMap
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          SseDeserializer deserializer) {
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return HeaderMapImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   Value
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          SseDeserializer deserializer) {
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ValueImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   HeaderMap
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          SseDeserializer deserializer) {
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return HeaderMapImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   Value
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          SseDeserializer deserializer) {
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ValueImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
@@ -583,20 +668,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   HeaderMap
-      sse_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          SseDeserializer deserializer) {
+  sse_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-        deserializer));
+      deserializer,
+    ));
   }
 
   @protected
   Value
-      sse_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          SseDeserializer deserializer) {
+  sse_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-        deserializer));
+      deserializer,
+    ));
   }
 
   @protected
@@ -620,13 +709,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   HeaderMap?
-      sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          SseDeserializer deserializer) {
+  sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          deserializer));
+        deserializer,
+      ));
     } else {
       return null;
     }
@@ -634,13 +725,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   Value?
-      sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          SseDeserializer deserializer) {
+  sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          deserializer));
+        deserializer,
+      ));
     } else {
       return null;
     }
@@ -648,7 +741,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   (bool, String, List<String>) sse_decode_record_bool_string_list_string(
-      SseDeserializer deserializer) {
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_field0 = sse_decode_bool(deserializer);
     var var_field1 = sse_decode_String(deserializer);
@@ -658,7 +752,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   (String, List<String>) sse_decode_record_string_list_string(
-      SseDeserializer deserializer) {
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_field0 = sse_decode_String(deserializer);
     var var_field1 = sse_decode_list_String(deserializer);
@@ -702,38 +797,54 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          HeaderMap self, SseSerializer serializer) {
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    HeaderMap self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as HeaderMapImpl).frbInternalSseEncode(move: true), serializer);
+      (self as HeaderMapImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
   }
 
   @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          Value self, SseSerializer serializer) {
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    Value self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as ValueImpl).frbInternalSseEncode(move: true), serializer);
+      (self as ValueImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
   }
 
   @protected
   void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          HeaderMap self, SseSerializer serializer) {
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    HeaderMap self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as HeaderMapImpl).frbInternalSseEncode(move: null), serializer);
+      (self as HeaderMapImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
   }
 
   @protected
   void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          Value self, SseSerializer serializer) {
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    Value self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as ValueImpl).frbInternalSseEncode(move: null), serializer);
+      (self as ValueImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
   }
 
   @protected
@@ -750,20 +861,28 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
-      sse_encode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          HeaderMap self, SseSerializer serializer) {
+  sse_encode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    HeaderMap self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-        self, serializer);
+      self,
+      serializer,
+    );
   }
 
   @protected
   void
-      sse_encode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          Value self, SseSerializer serializer) {
+  sse_encode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    Value self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-        self, serializer);
+      self,
+      serializer,
+    );
   }
 
   @protected
@@ -777,7 +896,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_list_prim_u_8_strict(
-      Uint8List self, SseSerializer serializer) {
+    Uint8List self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
@@ -785,33 +906,43 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
-      sse_encode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          HeaderMap? self, SseSerializer serializer) {
+  sse_encode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
+    HeaderMap? self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerHeaderMap(
-          self, serializer);
+        self,
+        serializer,
+      );
     }
   }
 
   @protected
   void
-      sse_encode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          Value? self, SseSerializer serializer) {
+  sse_encode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    Value? self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
-          self, serializer);
+        self,
+        serializer,
+      );
     }
   }
 
   @protected
   void sse_encode_record_bool_string_list_string(
-      (bool, String, List<String>) self, SseSerializer serializer) {
+    (bool, String, List<String>) self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_bool(self.$1, serializer);
     sse_encode_String(self.$2, serializer);
@@ -820,7 +951,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_record_string_list_string(
-      (String, List<String>) self, SseSerializer serializer) {
+    (String, List<String>) self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.$1, serializer);
     sse_encode_list_String(self.$2, serializer);
@@ -866,11 +999,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 class HeaderMapImpl extends RustOpaque implements HeaderMap {
   // Not to be used by end users
   HeaderMapImpl.frbInternalDcoDecode(List<dynamic> wire)
-      : super.frbInternalDcoDecode(wire, _kStaticData);
+    : super.frbInternalDcoDecode(wire, _kStaticData);
 
   // Not to be used by end users
   HeaderMapImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount:
@@ -886,11 +1019,11 @@ class HeaderMapImpl extends RustOpaque implements HeaderMap {
 class ValueImpl extends RustOpaque implements Value {
   // Not to be used by end users
   ValueImpl.frbInternalDcoDecode(List<dynamic> wire)
-      : super.frbInternalDcoDecode(wire, _kStaticData);
+    : super.frbInternalDcoDecode(wire, _kStaticData);
 
   // Not to be used by end users
   ValueImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount:
