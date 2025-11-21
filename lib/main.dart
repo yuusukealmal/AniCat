@@ -1,5 +1,10 @@
+// flutter
 import 'package:flutter/material.dart';
 
+// frb
+import 'package:anicat/src/rust/frb_generated.dart';
+
+// 3rd lib
 import 'package:provider/provider.dart';
 
 import 'package:anicat/config/SharedPreferences.dart';
@@ -11,6 +16,8 @@ import 'package:anicat/pages/MyHomePage.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPreferencesHelper.init();
+  await RustLib.init();
+
   runApp(
     MultiProvider(
       providers: [

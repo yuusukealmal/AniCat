@@ -1,9 +1,9 @@
+import 'package:anicat/src/rust/api/http/interface.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import 'package:anicat/api/AnimeList.dart';
-import 'package:anicat/downloader/UrlParse.dart';
+import 'package:anicat/class/AnimeList.dart';
 import 'package:anicat/downloader/AnimeDownloader.dart';
 import 'package:anicat/functions/behavior/ImgCache.dart';
 import 'package:anicat/config/notifier/OverlayProvider.dart';
@@ -23,10 +23,13 @@ class _AnimeSearch extends State<AnimeSearch> with ImgCache {
   TextEditingController _textController = TextEditingController();
 
   Future<void> _getManifest() async {
-    List<AnimeValue> animeList = await getAnimeList();
+    final rawAnimeString = await getAnimeList();
     if (!mounted) return;
+
     setState(() {
-      animes = animeList.where((e) => !e.name.contains("https://")).toList();
+      animes = AnimeValue.fromJson(rawAnimeString)
+          .where((e) => !e.name.contains("https://"))
+          .toList();
     });
   }
 
@@ -158,14 +161,15 @@ class _AnimeSearch extends State<AnimeSearch> with ImgCache {
                                 : [_textController.text];
                         context.read<OverlayProvider>().setIsDownloading(true);
                         for (String inputUrl in finalSelectedAnimes) {
-                          await parse(inputUrl).then((urls) async {
+                          await parseAnimeUrl(url: inputUrl)
+                              .then((result) async {
+                            String folder = result.$1;
+                            List<String> urls = result.$2;
                             if (urls.isEmpty) {
                               if (mounted) {
                                 animeInvalidDialog(context);
                               }
                             }
-                            urls = urls.reversed.toList();
-                            String folder = urls.removeAt(0);
                             for (String url in urls) {
                               MP4 anime = MP4(folder: folder, url: url);
                               await anime.init();

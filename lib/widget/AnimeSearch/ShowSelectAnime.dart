@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:anicat/api/AnimeList.dart';
+import 'package:anicat/class/AnimeList.dart';
 
 Future<void> showSelected(
     BuildContext context, List<AnimeValue> selectedAnimes) {

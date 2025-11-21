@@ -22,10 +22,10 @@ class AnimeListState extends State<AnimeList> with PathHandle, ImgCache {
   }
 
   Future<void> loadFolders() async {
-    List<String> folderList = await loadStorageFolders();
-    setState(() {
-      folders = folderList;
-    });
+    // List<String> folderList = await loadStorageFolders();
+    // setState(() {
+    //   folders = folderList;
+    // });
   }
 
   @override
